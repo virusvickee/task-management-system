@@ -4,15 +4,10 @@ import { Document, Types } from 'mongoose';
 export type TaskDocument = Task & Document;
 
 export enum TaskStatus {
-  TODO = 'todo',
-  IN_PROGRESS = 'in_progress',
-  DONE = 'done',
-}
-
-export enum TaskPriority {
-  LOW = 'low',
-  MEDIUM = 'medium',
-  HIGH = 'high',
+  TODO = 'To Do',
+  DOING = 'Doing',
+  COMPLETED = 'Completed',
+  ON_HOLD = 'On Hold',
 }
 
 @Schema({ timestamps: true })
@@ -23,11 +18,20 @@ export class Task {
   @Prop({ trim: true })
   description?: string;
 
-  @Prop({ enum: TaskStatus, default: TaskStatus.TODO })
+  @Prop({ enum: Object.values(TaskStatus), default: TaskStatus.TODO })
   status: TaskStatus;
 
-  @Prop({ enum: TaskPriority, default: TaskPriority.MEDIUM })
-  priority: TaskPriority;
+  @Prop({ trim: true })
+  assignee?: string;
+
+  @Prop({ type: [String], default: [] })
+  tags: string[];
+
+  @Prop()
+  startDate?: Date;
+
+  @Prop()
+  endDate?: Date;
 
   @Prop()
   dueDate?: Date;

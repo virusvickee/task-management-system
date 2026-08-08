@@ -1,5 +1,5 @@
-import { IsEnum, IsNotEmpty, IsOptional, IsString, IsDateString } from 'class-validator';
-import { TaskPriority, TaskStatus } from '../schemas/task.schema';
+import { IsArray, IsEnum, IsNotEmpty, IsOptional, IsString } from 'class-validator';
+import { TaskStatus } from '../schemas/task.schema';
 
 export class CreateTaskDto {
   @IsString()
@@ -15,10 +15,23 @@ export class CreateTaskDto {
   status?: TaskStatus;
 
   @IsOptional()
-  @IsEnum(TaskPriority)
-  priority?: TaskPriority;
+  @IsString()
+  assignee?: string;
 
   @IsOptional()
-  @IsDateString()
+  @IsArray()
+  @IsString({ each: true })
+  tags?: string[];
+
+  @IsOptional()
+  @IsString()
+  startDate?: string;
+
+  @IsOptional()
+  @IsString()
+  endDate?: string;
+
+  @IsOptional()
+  @IsString()
   dueDate?: string;
 }

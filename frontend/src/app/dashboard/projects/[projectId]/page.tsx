@@ -1,9 +1,10 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
+import Link from 'next/link';
+import { useParams } from 'next/navigation';
 import {
-  PanelLeftClose, PanelLeftOpen,
-  Search, Filter, Plus,
+  Search, Filter, Plus, ChevronRight,
 } from 'lucide-react';
 import KanbanCol from '@/components/KanbanCol';
 import FieldsDropdown from '@/components/FieldsDropdown';
@@ -12,8 +13,10 @@ import { useTasks, STATUSES } from '@/hooks/useTasks';
 import type { Status, Task } from '@/hooks/useTasks';
 import { EMPTY_FILTERS } from '@/components/FieldsDropdown';
 import type { TaskFilters } from '@/components/FieldsDropdown';
+import { SEED_PROJECTS } from '@/lib/projects';
 
 import { useSidebar } from '@/context/sidebar-context';
+import { PanelLeftClose, PanelLeftOpen } from 'lucide-react';
 
 export type FieldVisibility = {
   priority: boolean;
@@ -25,20 +28,11 @@ export type FieldVisibility = {
 };
 
 function matchesFilters(task: Task, filters: TaskFilters): boolean {
-  if (
-    filters.priorities.length > 0 &&
-    !(task as any).priority &&
-    !filters.priorities.includes('No Priority')
-  ) {
-    // task has no priority field — skip if not filtering for 'No Priority'
-    if (!filters.priorities.includes('No Priority')) return false;
-  }
   if (filters.statuses.length > 0 && !filters.statuses.includes(task.status)) return false;
   if (filters.members.length > 0 && task.assignee && !filters.members.includes(task.assignee)) return false;
   if (filters.labels.length > 0) {
     const taskLabels = task.tags ?? [];
-    const hasLabel = filters.labels.some((l) => taskLabels.includes(l));
-    if (taskLabels.length > 0 && !hasLabel) return false;
+    if (taskLabels.length > 0 && !filters.labels.some((l) => taskLabels.includes(l))) return false;
   }
   if (filters.dueDateRange) {
     const now = new Date();
@@ -46,22 +40,24 @@ function matchesFilters(task: Task, filters: TaskFilters): boolean {
     const sod = new Date(now.getFullYear(), now.getMonth(), now.getDate());
     const eod = new Date(sod.getTime() + 86400000 - 1);
     const eow = new Date(sod.getTime() + (7 - sod.getDay()) * 86400000 - 1);
-
-    if (filters.dueDateRange === 'no_date'    && due !== null) return false;
-    if (filters.dueDateRange === 'overdue'    && (!due || due >= sod)) return false;
-    if (filters.dueDateRange === 'today'      && (!due || due < sod || due > eod)) return false;
-    if (filters.dueDateRange === 'this_week'  && (!due || due < sod || due > eow)) return false;
+    if (filters.dueDateRange === 'no_date'   && due !== null) return false;
+    if (filters.dueDateRange === 'overdue'   && (!due || due >= sod)) return false;
+    if (filters.dueDateRange === 'today'     && (!due || due < sod || due > eod)) return false;
+    if (filters.dueDateRange === 'this_week' && (!due || due < sod || due > eow)) return false;
   }
   return true;
 }
 
-export default function DashboardPage() {
+export default function ProjectTasksPage() {
+  const { projectId } = useParams<{ projectId: string }>();
+  const project = SEED_PROJECTS.find((p) => p.id === projectId);
   const { sidebarOpen, setSidebarOpen } = useSidebar();
-  const [view, setView]               = useState<'Board' | 'List'>('Board');
-  const [searchOpen, setSearchOpen]   = useState(false);
-  const [query, setQuery]             = useState('');
-  const [filters, setFilters]         = useState<TaskFilters>(EMPTY_FILTERS);
-  const [fields, setFields]           = useState<FieldVisibility>({
+
+  const [view, setView]             = useState<'Board' | 'List'>('Board');
+  const [searchOpen, setSearchOpen] = useState(false);
+  const [query, setQuery]           = useState('');
+  const [filters, setFilters]       = useState<TaskFilters>(EMPTY_FILTERS);
+  const [fields, setFields]         = useState<FieldVisibility>({
     priority: true, members: true, dueDate: true,
     labels: true, status: true, reporter: true,
   });
@@ -96,25 +92,54 @@ export default function DashboardPage() {
     ]),
   ) as Record<Status, Task[]>;
 
-  const hasActiveFilters = q || Object.values(filters).some((v) => Array.isArray(v) ? v.length > 0 : v !== null);
+  const hasActiveFilters = q || Object.values(filters).some((v) =>
+    Array.isArray(v) ? v.length > 0 : v !== null
+  );
+  const totalResults = Object.values(filteredByColumn).flat().length;
 
   return (
     <div className="flex flex-col flex-1 min-w-0 overflow-hidden">
       <header className="flex items-center justify-between px-5 py-3 border-b border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 shrink-0">
-        <div className="flex items-center gap-3">
-          <button onClick={() => setSidebarOpen((v) => !v)} className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors" aria-label="Toggle sidebar">
+        <div className="flex items-center gap-3 min-w-0">
+          <button
+            onClick={() => setSidebarOpen(!sidebarOpen)}
+            className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors shrink-0"
+            aria-label="Toggle sidebar"
+          >
             {sidebarOpen ? <PanelLeftClose size={18} /> : <PanelLeftOpen size={18} />}
           </button>
-          <h1 className="text-xl font-bold text-gray-900 dark:text-gray-100">Tasks</h1>
-          {hasActiveFilters && (
-            <span className="text-[12px] text-gray-400 dark:text-gray-500">
-              {Object.values(filteredByColumn).flat().length} results
+          <div className="flex flex-col justify-center gap-0.5 min-w-0">
+          {/* Breadcrumb */}
+          <nav className="flex items-center gap-1 text-[12px]" aria-label="Breadcrumb">
+            <Link
+              href="/dashboard/projects"
+              className="text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 transition-colors font-medium"
+            >
+              Projects
+            </Link>
+            <ChevronRight size={12} className="text-gray-400 shrink-0" />
+            <span className="text-gray-400 dark:text-gray-500 font-medium truncate">
+              {project?.name ?? projectId}
             </span>
-          )}
+          </nav>
+
+          {/* Page title row */}
+          <div className="flex items-center gap-2">
+            <h1 className="text-xl font-bold text-gray-900 dark:text-gray-100 truncate">
+              {project?.name ?? 'Project Tasks'}
+            </h1>
+            {hasActiveFilters && (
+              <span className="text-[12px] text-gray-400 dark:text-gray-500">
+                {totalResults} results
+              </span>
+            )}
+          </div>
         </div>
-        <div className="flex items-center gap-2">
+      </div>
+
+        <div className="flex items-center gap-2 shrink-0 ml-4">
           {searchOpen ? (
-            <div className="flex items-center gap-2 px-3 py-1.5 w-[300px] border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800">
+            <div className="flex items-center gap-2 px-3 py-1.5 w-[280px] border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800">
               <Search size={14} className="text-gray-400 shrink-0" />
               <input
                 ref={searchRef}
@@ -125,10 +150,12 @@ export default function DashboardPage() {
                 placeholder="Search tasks..."
                 className="flex-1 text-[13px] text-gray-800 dark:text-gray-200 placeholder-gray-400 outline-none bg-transparent"
               />
-              <span className="text-[11px] text-gray-500 bg-gray-100 dark:bg-gray-700 dark:text-gray-400 rounded px-1.5 py-0.5 font-medium shrink-0 select-none">⌘F</span>
             </div>
           ) : (
-            <button onClick={openSearch} className="p-1.5 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors rounded-md hover:bg-gray-50 dark:hover:bg-gray-800">
+            <button
+              onClick={openSearch}
+              className="p-1.5 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors rounded-md hover:bg-gray-50 dark:hover:bg-gray-800"
+            >
               <Search size={16} />
             </button>
           )}
@@ -154,16 +181,29 @@ export default function DashboardPage() {
         </div>
       </header>
 
+      {/* Board / List */}
       {view === 'Board' ? (
         <div className="flex-1 overflow-x-auto overflow-y-auto bg-gray-50 dark:bg-gray-950">
           <div className="flex gap-6 p-6 min-h-full items-start">
             {STATUSES.filter((s) => !hasActiveFilters || filteredByColumn[s].length > 0).map((status) => (
-              <KanbanCol key={status} title={status} tasks={filteredByColumn[status]} onDrop={updateTaskStatus} onAddTask={createTask} fields={fields} />
+              <KanbanCol
+                key={status}
+                title={status}
+                tasks={filteredByColumn[status]}
+                onDrop={updateTaskStatus}
+                onAddTask={createTask}
+                fields={fields}
+              />
             ))}
           </div>
         </div>
       ) : (
-        <ListView tasksByColumn={filteredByColumn} onAddTask={createTask} query={q} fields={fields} />
+        <ListView
+          tasksByColumn={filteredByColumn}
+          onAddTask={createTask}
+          query={q}
+          fields={fields}
+        />
       )}
     </div>
   );
