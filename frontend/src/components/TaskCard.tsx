@@ -1,4 +1,4 @@
-import { CalendarDays, MoreHorizontal } from 'lucide-react';
+import { BarChart2, CalendarDays, MoreHorizontal } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import type { Task } from '@/hooks/useTasks';
 
@@ -10,6 +10,14 @@ function avatarColor(name: string) {
   for (let i = 0; i < name.length; i++) h = (h * 31 + name.charCodeAt(i)) >>> 0;
   return AVATAR_COLORS[h % AVATAR_COLORS.length];
 }
+
+const PRIORITY_COLORS: Record<string, string> = {
+  'Urgent':      'text-red-600',
+  'High':        'text-red-500',
+  'Medium':      'text-orange-500',
+  'Low':         'text-gray-400',
+  'No Priority': 'text-gray-300',
+};
 
 export default function TaskCard({ task, fields }: { task: Task; fields: Record<string, boolean> }) {
   const router = useRouter();
@@ -28,9 +36,18 @@ export default function TaskCard({ task, fields }: { task: Task; fields: Record<
     >
       <div className="flex items-start justify-between gap-2 mb-2.5">
         <p className="text-sm font-medium text-gray-800 leading-snug">{task.title}</p>
-        <button className="opacity-0 group-hover:opacity-100 transition-opacity shrink-0 text-gray-400 hover:text-gray-600 mt-px">
-          <MoreHorizontal size={14} />
-        </button>
+        <div className="flex items-center gap-1 shrink-0 mt-px">
+          {fields.priority && task.priority && task.priority !== 'No Priority' && (
+            <BarChart2
+              size={13}
+              className={PRIORITY_COLORS[task.priority] ?? 'text-gray-300'}
+              aria-label={task.priority}
+            />
+          )}
+          <button className="opacity-0 group-hover:opacity-100 transition-opacity text-gray-400 hover:text-gray-600">
+            <MoreHorizontal size={14} />
+          </button>
+        </div>
       </div>
 
       <div className="flex items-center justify-between mb-2">

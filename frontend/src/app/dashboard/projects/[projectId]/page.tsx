@@ -13,7 +13,7 @@ import { useTasks, STATUSES } from '@/hooks/useTasks';
 import type { Status, Task } from '@/hooks/useTasks';
 import { EMPTY_FILTERS } from '@/components/FieldsDropdown';
 import type { TaskFilters } from '@/components/FieldsDropdown';
-import { SEED_PROJECTS } from '@/lib/projects';
+import { apiFetch, guestLogin } from '@/lib/api';
 
 import { useSidebar } from '@/context/sidebar-context';
 import { PanelLeftClose, PanelLeftOpen } from 'lucide-react';
@@ -50,7 +50,7 @@ function matchesFilters(task: Task, filters: TaskFilters): boolean {
 
 export default function ProjectTasksPage() {
   const { projectId } = useParams<{ projectId: string }>();
-  const project = SEED_PROJECTS.find((p) => p.id === projectId);
+  const [projectName, setProjectName] = useState<string>('');
   const { sidebarOpen, setSidebarOpen } = useSidebar();
 
   const [view, setView]             = useState<'Board' | 'List'>('Board');
@@ -62,7 +62,22 @@ export default function ProjectTasksPage() {
     labels: true, status: true, reporter: true,
   });
   const searchRef = useRef<HTMLInputElement>(null);
-  const { tasksByColumn, createTask, updateTaskStatus } = useTasks();
+  const { tasksByColumn, createTask, updateTask } = useTasks(projectId);
+
+  const handleDrop = (taskId: string, status: Status) => updateTask(taskId, { status });
+
+  useEffect(() => {
+    async function loadProject() {
+      if (!localStorage.getItem('tms-token')) await guestLogin();
+      try {
+        const p = await apiFetch(`/projects/${projectId}`);
+        setProjectName(p.name);
+      } catch {
+        setProjectName(projectId ?? 'Project Tasks');
+      }
+    }
+    loadProject();
+  }, [projectId]);
 
   useEffect(() => {
     function onKeyDown(e: KeyboardEvent) {
@@ -119,14 +134,14 @@ export default function ProjectTasksPage() {
             </Link>
             <ChevronRight size={12} className="text-gray-400 shrink-0" />
             <span className="text-gray-400 dark:text-gray-500 font-medium truncate">
-              {project?.name ?? projectId}
+              {projectName || projectId}
             </span>
           </nav>
 
           {/* Page title row */}
           <div className="flex items-center gap-2">
             <h1 className="text-xl font-bold text-gray-900 dark:text-gray-100 truncate">
-              {project?.name ?? 'Project Tasks'}
+              {projectName || 'Project Tasks'}
             </h1>
             {hasActiveFilters && (
               <span className="text-[12px] text-gray-400 dark:text-gray-500">
@@ -190,7 +205,7 @@ export default function ProjectTasksPage() {
                 key={status}
                 title={status}
                 tasks={filteredByColumn[status]}
-                onDrop={updateTaskStatus}
+                onDrop={handleDrop}
                 onAddTask={createTask}
                 fields={fields}
               />

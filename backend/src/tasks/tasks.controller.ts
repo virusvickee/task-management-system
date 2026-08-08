@@ -6,6 +6,7 @@ import {
   Param,
   Patch,
   Post,
+  Query,
   Req,
   UseGuards,
 } from '@nestjs/common';
@@ -25,8 +26,8 @@ export class TasksController {
   }
 
   @Get()
-  findAll(@Req() req: any) {
-    return this.tasksService.findAllForUser(req.user.sub);
+  findAll(@Req() req: any, @Query('projectId') projectId?: string) {
+    return this.tasksService.findAllForUser(req.user.sub, projectId);
   }
 
   @Get(':id')

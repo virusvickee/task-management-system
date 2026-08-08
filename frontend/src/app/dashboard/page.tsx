@@ -25,13 +25,9 @@ export type FieldVisibility = {
 };
 
 function matchesFilters(task: Task, filters: TaskFilters): boolean {
-  if (
-    filters.priorities.length > 0 &&
-    !(task as any).priority &&
-    !filters.priorities.includes('No Priority')
-  ) {
-    // task has no priority field — skip if not filtering for 'No Priority'
-    if (!filters.priorities.includes('No Priority')) return false;
+  if (filters.priorities.length > 0) {
+    const taskPriority = task.priority || 'No Priority';
+    if (!filters.priorities.includes(taskPriority)) return false;
   }
   if (filters.statuses.length > 0 && !filters.statuses.includes(task.status)) return false;
   if (filters.members.length > 0 && task.assignee && !filters.members.includes(task.assignee)) return false;
@@ -66,7 +62,9 @@ export default function DashboardPage() {
     labels: true, status: true, reporter: true,
   });
   const searchRef = useRef<HTMLInputElement>(null);
-  const { tasksByColumn, createTask, updateTaskStatus } = useTasks();
+  const { tasksByColumn, createTask, updateTask } = useTasks();
+
+  const handleDrop = (taskId: string, status: Status) => updateTask(taskId, { status });
 
   useEffect(() => {
     function onKeyDown(e: KeyboardEvent) {
@@ -158,7 +156,7 @@ export default function DashboardPage() {
         <div className="flex-1 overflow-x-auto overflow-y-auto bg-gray-50 dark:bg-gray-950">
           <div className="flex gap-6 p-6 min-h-full items-start">
             {STATUSES.filter((s) => !hasActiveFilters || filteredByColumn[s].length > 0).map((status) => (
-              <KanbanCol key={status} title={status} tasks={filteredByColumn[status]} onDrop={updateTaskStatus} onAddTask={createTask} fields={fields} />
+              <KanbanCol key={status} title={status} tasks={filteredByColumn[status]} onDrop={handleDrop} onAddTask={createTask} fields={fields} />
             ))}
           </div>
         </div>

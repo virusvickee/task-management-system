@@ -19,9 +19,17 @@ function Avatar({ name }: { name: string }) {
 }
 
 /* ── Priority cell ── */
-function Priority() {
-  // Tasks don't have priority in schema yet — show a neutral placeholder
-  return <span className="text-[12px] text-gray-400 flex items-center gap-1"><SignalLow size={12} />—</span>;
+const PRIORITY_CONFIG: Record<string, { color: string; label: string }> = {
+  'Urgent':      { color: 'text-red-600',    label: 'Urgent' },
+  'High':        { color: 'text-red-500',    label: 'High' },
+  'Medium':      { color: 'text-orange-500', label: 'Medium' },
+  'Low':         { color: 'text-gray-400',   label: 'Low' },
+  'No Priority': { color: 'text-gray-400',   label: '—' },
+};
+
+function Priority({ value }: { value?: string }) {
+  const p = PRIORITY_CONFIG[value || 'No Priority'] || PRIORITY_CONFIG['No Priority'];
+  return <span className={`text-[12px] ${p.color} flex items-center gap-1 font-medium`}><SignalLow size={12} />{p.label}</span>;
 }
 
 /* ── Status section ── */
@@ -94,7 +102,7 @@ function StatusSection({
               {tasks.map((task) => (
                 <tr key={task._id} className="border-b border-gray-100 hover:bg-gray-50 transition-colors h-12 cursor-pointer" onClick={() => router.push(`/dashboard/tasks/${task._id}`)}>
                   <td className="px-4 py-2 text-sm text-gray-900">{task.title}</td>
-                  {fields.priority && <td className="px-4 py-2"><Priority /></td>}
+                  {fields.priority && <td className="px-4 py-2"><Priority value={task.priority} /></td>}
                   {fields.members && (
                     <td className="px-4 py-2">
                       {task.assignee

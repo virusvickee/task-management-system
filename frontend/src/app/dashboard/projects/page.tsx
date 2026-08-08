@@ -2,14 +2,12 @@
 
 import { useRef, useState } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
 import {
   Search, Filter, Plus, MoreHorizontal,
   BarChart2, ChevronDown, FolderKanban,
 } from 'lucide-react';
 
-import { SEED_PROJECTS } from '@/lib/projects';
-import type { Project } from '@/lib/projects';
+import { useProjects } from '@/hooks/useProjects';
 
 import { useSidebar } from '@/context/sidebar-context';
 import { PanelLeftClose, PanelLeftOpen } from 'lucide-react';
@@ -37,9 +35,8 @@ function Avatar({ name }: { name: string }) {
 
 /* ── Projects Page ────────────────────────────────────── */
 export default function ProjectsPage() {
-  const router = useRouter();
   const { sidebarOpen, setSidebarOpen } = useSidebar();
-  const [projects, setProjects] = useState<Project[]>(SEED_PROJECTS);
+  const { projects, loading, createProject } = useProjects();
   const [searchOpen, setSearchOpen] = useState(false);
   const [query, setQuery]           = useState('');
   const [adding, setAdding]         = useState(false);
@@ -58,16 +55,7 @@ export default function ProjectsPage() {
   function commitAdd() {
     const name = newName.trim();
     if (name) {
-      setProjects((prev) => [
-        ...prev,
-        {
-          id: `proj-${Date.now()}`,
-          name,
-          priority: 'No Priority',
-          lead: 'You',
-          dueDate: null,
-        },
-      ]);
+      createProject(name);
     }
     setNewName('');
     setAdding(false);
@@ -158,13 +146,13 @@ export default function ProjectsPage() {
                 const pc = PRIORITY_CONFIG[project.priority];
                 return (
                   <tr
-                    key={project.id}
+                    key={project._id}
                     className="border-b border-gray-100 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors h-12"
                   >
                     {/* Project name — clickable link */}
                     <td className="px-4 py-2">
                       <Link
-                        href={`/dashboard/projects/${project.id}`}
+                        href={`/dashboard/projects/${project._id}`}
                         className="text-[14px] font-medium text-gray-900 dark:text-gray-100 hover:underline flex items-center gap-2 group"
                         onClick={(e) => e.stopPropagation()}
                       >
@@ -189,8 +177,8 @@ export default function ProjectsPage() {
                     {/* Lead */}
                     <td className="px-4 py-2">
                       <div className="flex items-center gap-2">
-                        <Avatar name={project.lead} />
-                        <span className="text-[13px] text-gray-700 dark:text-gray-300 whitespace-nowrap">{project.lead}</span>
+                        <Avatar name={project.lead ?? 'Unknown'} />
+                        <span className="text-[13px] text-gray-700 dark:text-gray-300 whitespace-nowrap">{project.lead ?? '—'}</span>
                       </div>
                     </td>
 

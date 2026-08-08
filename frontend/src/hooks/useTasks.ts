@@ -7,11 +7,14 @@ export interface Task {
   _id: string;
   title: string;
   status: string;
+  priority?: string;
   assignee?: string;
+  members?: string[];
   tags: string[];
   startDate?: string;
   endDate?: string;
   dueDate?: string;
+  projectId?: string;
 }
 
 export const STATUSES = ['To Do', 'Doing', 'Completed', 'On Hold'] as const;
@@ -21,43 +24,45 @@ async function ensureAuth() {
   if (!localStorage.getItem('tms-token')) await guestLogin();
 }
 
-export function useTasks() {
+export function useTasks(projectId?: string) {
   const [tasks, setTasks] = useState<Task[]>([]);
 
   useEffect(() => {
     ensureAuth()
-      .then(() => apiFetch('/tasks'))
+      .then(() => apiFetch(projectId ? `/tasks?projectId=${projectId}` : '/tasks'))
       .then(setTasks)
       .catch(console.error);
-  }, []);
+  }, [projectId]);
 
   const tasksByColumn = Object.fromEntries(
     STATUSES.map((s) => [s, tasks.filter((t) => t.status === s)]),
   ) as Record<Status, Task[]>;
 
   const createTask = useCallback(async (title: string, status: Status = 'To Do') => {
-    const optimistic: Task = { _id: `tmp-${Date.now()}`, title, status, tags: [] };
+    const optimistic: Task = { _id: `tmp-${Date.now()}`, title, status, tags: [], projectId };
     setTasks((prev) => [optimistic, ...prev]);
     try {
       const created = await apiFetch('/tasks', {
         method: 'POST',
-        body: JSON.stringify({ title, status }),
+        body: JSON.stringify({ title, status, projectId }),
       });
       setTasks((prev) => prev.map((t) => (t._id === optimistic._id ? created : t)));
     } catch {
       setTasks((prev) => prev.filter((t) => t._id !== optimistic._id));
     }
-  }, []);
+  }, [projectId]);
 
-  const updateTaskStatus = useCallback(async (id: string, status: Status) => {
-    setTasks((prev) => prev.map((t) => (t._id === id ? { ...t, status } : t)));
+  const updateTask = useCallback(async (id: string, partialFields: Partial<Task>) => {
+    setTasks((prev) => prev.map((t) => (t._id === id ? { ...t, ...partialFields } : t)));
     try {
-      await apiFetch(`/tasks/${id}`, { method: 'PATCH', body: JSON.stringify({ status }) });
+      await apiFetch(`/tasks/${id}`, { method: 'PATCH', body: JSON.stringify(partialFields) });
     } catch {
       // revert on failure — refetch
-      apiFetch('/tasks').then(setTasks).catch(console.error);
+      apiFetch(projectId ? `/tasks?projectId=${projectId}` : '/tasks')
+        .then(setTasks)
+        .catch(console.error);
     }
-  }, []);
+  }, [projectId]);
 
-  return { tasksByColumn, createTask, updateTaskStatus };
+  return { tasks, tasksByColumn, createTask, updateTask };
 }

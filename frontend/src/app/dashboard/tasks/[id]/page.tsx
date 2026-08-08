@@ -363,7 +363,19 @@ export default function TaskDetailPage() {
   const { id } = useParams<{ id: string }>();
   const router = useRouter();
   const [task, setTask] = useState<Task | null>(null);
-  const [priority, setPriority] = useState<Priority>('High');
+  const [priority, setPriority] = useState<Priority>('No Priority');
+
+  async function handlePriorityChange(p: Priority) {
+    setPriority(p);
+    try {
+      await apiFetch(`/tasks/${id}`, {
+        method: 'PATCH',
+        body: JSON.stringify({ priority: p }),
+      });
+    } catch (err) {
+      console.error('Failed to update priority:', err);
+    }
+  }
   const [rightPanel, setRightPanel] = useState(true);
   const [loading, setLoading] = useState(true);
 
@@ -371,7 +383,7 @@ export default function TaskDetailPage() {
     apiFetch(`/tasks/${id}`)
       .then((t) => {
         setTask(t);
-        setPriority('High');
+        setPriority((t.priority as Priority) || 'No Priority');
       })
       .catch(() => router.replace('/dashboard'))
       .finally(() => setLoading(false));
@@ -461,7 +473,7 @@ export default function TaskDetailPage() {
         {/* Right panel */}
         {rightPanel && (
           <div className="w-full lg:w-72 lg:shrink-0 border-t lg:border-t-0 lg:border-l border-gray-200 dark:border-gray-800 overflow-y-auto overflow-x-visible p-4 bg-white dark:bg-gray-900">
-            <RightPanel task={task} priority={priority} onPriorityChange={setPriority} />
+            <RightPanel task={task} priority={priority} onPriorityChange={handlePriorityChange} />
           </div>
         )}
       </div>

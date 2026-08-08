@@ -13,8 +13,12 @@ export class TasksService {
     return this.taskModel.create({ ...dto, owner: ownerId });
   }
 
-  findAllForUser(ownerId: string) {
-    return this.taskModel.find({ owner: ownerId }).sort({ createdAt: -1 }).exec();
+  findAllForUser(ownerId: string, projectId?: string) {
+    const query: any = { owner: ownerId };
+    if (projectId) {
+      query.projectId = projectId;
+    }
+    return this.taskModel.find(query).sort({ createdAt: -1 }).exec();
   }
 
   async findOne(ownerId: string, id: string) {
