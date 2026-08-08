@@ -5,9 +5,9 @@ import { User, UserDocument } from './schemas/user.schema';
 
 @Injectable()
 export class UsersService {
-  constructor(@InjectModel(User.name) private userModel: Model<UserDocument>) {}
+  constructor(@InjectModel(User.name) private userModel: Model<UserDocument>) { }
 
-  async createGuest(name: string) {
+  async createGuest(name?: string) {
     const guestName = name?.trim() || `Guest-${Date.now().toString().slice(-5)}`;
     return this.userModel.create({ name: guestName, isGuest: true });
   }
