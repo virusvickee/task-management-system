@@ -41,6 +41,15 @@ export class Task {
   @Prop({ type: [String], default: [] })
   tags: string[];
 
+  @Prop({ trim: true })
+  team?: string;
+
+  @Prop({ trim: true })
+  reporterName?: string;
+
+  @Prop({ default: false })
+  locked: boolean;
+
   @Prop()
   startDate?: Date;
 
@@ -55,6 +64,43 @@ export class Task {
 
   @Prop({ type: Types.ObjectId, ref: 'Project' })
   projectId?: Types.ObjectId;
+
+  @Prop({ type: Types.ObjectId, ref: 'Task' })
+  parentTaskId?: Types.ObjectId;
+
+  @Prop({
+    type: [{
+      title: { type: String, required: true },
+      url: { type: String, required: true },
+    }],
+    default: [],
+  })
+  resources: { title: string; url: string }[];
+
+  @Prop({
+    type: [{
+      author: { type: String, required: true },
+      text: { type: String, required: true },
+      reactions: { type: [String], default: [] },
+      attachments: {
+        type: [{
+          name: { type: String, required: true },
+          dataUrl: { type: String, required: true },
+          type: { type: String, required: true },
+        }],
+        default: [],
+      },
+      createdAt: { type: Date, default: Date.now }
+    }],
+    default: []
+  })
+  comments?: {
+    author: string;
+    text: string;
+    reactions: string[];
+    attachments: { name: string; dataUrl: string; type: string }[];
+    createdAt: Date;
+  }[];
 }
 
 export const TaskSchema = SchemaFactory.createForClass(Task);

@@ -4,15 +4,16 @@ import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import {
-  CheckSquare, FolderKanban, ChevronDown, ChevronRight,
-  Settings, Sun, Moon, Check,
+  LayoutGrid, FolderOpen, ChevronDown, ChevronRight,
+  ChevronsUpDown, Settings, Sun, Moon, Check, X,
 } from 'lucide-react';
 import { useTheme, ACCENT_COLORS } from '@/context/theme-context';
 import type { AccentColor } from '@/context/theme-context';
+import { apiFetch } from '@/lib/api';
 
 type ThemeOption = 'light' | 'dark';
 
-function UserMenuDropdown({ onClose }: { onClose: () => void }) {
+function UserMenuDropdown({ user, onClose }: { user?: { name?: string; email?: string } | null; onClose: () => void }) {
   const ref = useRef<HTMLDivElement>(null);
   const [submenu, setSubmenu] = useState<'theme' | 'color' | null>(null);
   const { theme, setTheme, accentColor, setAccentColor } = useTheme();
@@ -30,23 +31,22 @@ function UserMenuDropdown({ onClose }: { onClose: () => void }) {
   return (
     <div
       ref={ref}
-      className="absolute left-2 top-[60px] z-50 w-[220px] bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl shadow-lg py-2 select-none"
+      className="absolute left-2 top-[56px] z-[9999] w-[240px] min-w-[192px] rounded-md border border-gray-200 dark:border-gray-700 shadow-md py-2 select-none"
+      style={{
+        background: 'var(--base-popover, rgba(255, 255, 255, 1))',
+        borderTop: '1px solid var(--custom-foreground-5, rgba(10, 10, 10, 0.05))',
+      }}
     >
-      {/* User info block */}
+      {/* User info */}
       <div className="flex flex-col items-center px-4 pb-3 mb-1 border-b border-gray-100 dark:border-gray-800">
-        <div
-          className="w-10 h-10 rounded-full flex items-center justify-center text-white text-sm font-bold mt-1 mb-2"
-          style={{ backgroundColor: 'var(--accent-color)' }}
-        >
-          D
+        <div className="w-10 h-10 rounded-full shrink-0 overflow-hidden relative mt-1 mb-2 ring-1 ring-gray-200 dark:ring-gray-700">
+          <img src="/avatar.png" alt="Dexter" className="w-full h-full object-cover" />
         </div>
-        <p className="text-[13px] font-bold text-gray-900 dark:text-gray-100">Dexter</p>
-        <p className="text-[11px] text-gray-400 mt-0.5">dexter@gmail.com</p>
+        <p className="text-[13px] font-bold text-gray-900 dark:text-gray-100">{user?.name || 'Dexter'}</p>
+        <p className="text-[11px] text-gray-400 mt-0.5">{user?.email || 'dexter@gmail.com'}</p>
       </div>
 
-      {/* Menu items */}
       <div className="px-1.5 flex flex-col gap-0.5">
-
         {/* Change Theme */}
         <div className="relative">
           <button
@@ -58,7 +58,15 @@ function UserMenuDropdown({ onClose }: { onClose: () => void }) {
             <ChevronRight size={13} className="text-gray-400 shrink-0" />
           </button>
           {submenu === 'theme' && (
-            <div className="absolute left-full top-0 ml-1 w-[160px] bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl shadow-lg py-1.5 z-50">
+            <div
+              className="absolute left-full top-0 ml-1 w-[192px] min-w-[192px] rounded-md border border-gray-200 dark:border-gray-700 py-1.5 z-[9999] select-none"
+              style={{
+                background: 'var(--base-popover, rgba(255, 255, 255, 1))',
+                borderTop: '1px solid var(--custom-foreground-5, rgba(10, 10, 10, 0.05))',
+                boxShadow:
+                  'var(--shadowmd2offset-x, 0px) var(--shadowmd2offset-y, 2px) var(--shadowmd2blur-radius, 4px) var(--shadowmd2spread-radius, -2px) var(--shadowmd2color, rgba(16, 24, 40, 0.06))',
+              }}
+            >
               {(['light', 'dark'] as ThemeOption[]).map((t) => (
                 <button
                   key={t}
@@ -87,7 +95,15 @@ function UserMenuDropdown({ onClose }: { onClose: () => void }) {
             <ChevronRight size={13} className="text-gray-400 shrink-0" />
           </button>
           {submenu === 'color' && (
-            <div className="absolute left-full top-0 ml-1 w-[180px] bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl shadow-lg py-1.5 z-50">
+            <div
+              className="absolute left-full top-0 ml-1 w-[192px] min-w-[192px] rounded-md border border-gray-200 dark:border-gray-700 py-1.5 z-[9999] select-none"
+              style={{
+                background: 'var(--base-popover, rgba(255, 255, 255, 1))',
+                borderTop: '1px solid var(--custom-foreground-5, rgba(10, 10, 10, 0.05))',
+                boxShadow:
+                  'var(--shadowmd2offset-x, 0px) var(--shadowmd2offset-y, 2px) var(--shadowmd2blur-radius, 4px) var(--shadowmd2spread-radius, -2px) var(--shadowmd2color, rgba(16, 24, 40, 0.06))',
+              }}
+            >
               {ACCENT_COLORS.map((c) => (
                 <button
                   key={c.label}
@@ -107,10 +123,8 @@ function UserMenuDropdown({ onClose }: { onClose: () => void }) {
           )}
         </div>
 
-        {/* Divider before Settings */}
         <div className="my-1 border-t border-gray-100 dark:border-gray-800" />
 
-        {/* Settings */}
         <Link
           href="/dashboard/settings"
           onMouseEnter={() => setSubmenu(null)}
@@ -125,58 +139,100 @@ function UserMenuDropdown({ onClose }: { onClose: () => void }) {
   );
 }
 
-export default function Sidebar() {
+export default function Sidebar({ onClose }: { onClose?: () => void }) {
   const pathname = usePathname();
   const tasksActive    = pathname === '/dashboard' || pathname.startsWith('/dashboard/tasks');
   const projectsActive = pathname.startsWith('/dashboard/projects');
   const [menuOpen, setMenuOpen] = useState(false);
+  const [workspaceOpen, setWorkspaceOpen] = useState(true);
+  const [user, setUser] = useState<{ name?: string; email?: string } | null>(null);
+
+  useEffect(() => {
+    if (localStorage.getItem('tms-token')) {
+      apiFetch('/users/me')
+        .then(setUser)
+        .catch(() => {});
+    }
+  }, [menuOpen, pathname]);
 
   return (
-    <aside className="w-64 shrink-0 bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-800 flex flex-col py-4 px-3 relative">
-      {/* Workspace header / user menu trigger */}
+    <aside
+      className="w-64 shrink-0 border-r border-gray-200 dark:border-gray-800 flex flex-col py-3 px-2.5 relative h-full"
+      style={{ background: 'var(--base-sidebar, rgba(250, 250, 250, 1))' }}
+    >
+      {/* ── Mobile close button — only shown below lg ── */}
+      {onClose && (
+        <button
+          onClick={onClose}
+          className="lg:hidden absolute top-3 right-3 p-1.5 rounded-lg text-gray-400
+                     hover:text-gray-600 hover:bg-gray-100 dark:hover:bg-gray-800
+                     transition-colors z-10 min-w-[40px] min-h-[40px] flex items-center justify-center"
+          aria-label="Close sidebar"
+        >
+          <X size={16} />
+        </button>
+      )}
+
+      {/* ── User trigger ── */}
       <button
         onClick={() => setMenuOpen((v) => !v)}
-        className="flex items-center gap-2 px-2 mb-5 w-full text-left hover:bg-gray-50 dark:hover:bg-gray-800 rounded-lg py-1 transition-colors"
+        className="flex items-center w-full h-12 px-3 py-2 gap-2 rounded-xl mb-3
+                   text-left hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
       >
-        <div
-          className="w-7 h-7 rounded-full shrink-0 flex items-center justify-center text-white text-xs font-bold"
-          style={{ backgroundColor: 'var(--accent-color)' }}
-        >
-          D
+        <div className="w-8 h-8 rounded-full shrink-0 overflow-hidden relative ring-1 ring-gray-200 dark:ring-gray-700">
+          <img src="/avatar.png" alt="Avatar" className="w-full h-full object-cover" />
         </div>
-        <span className="text-base font-semibold text-gray-900 dark:text-gray-100 flex-1">Dexter</span>
-        <ChevronDown size={14} className={`text-gray-400 transition-transform duration-200 ${menuOpen ? 'rotate-180' : ''}`} />
+        <span className="text-[13px] font-semibold text-gray-900 dark:text-gray-100 flex-1 truncate">
+          {user?.name || 'Dexter'}
+        </span>
+        <ChevronsUpDown size={14} className="text-gray-400 dark:text-gray-500 shrink-0" />
       </button>
 
-      {/* User menu dropdown */}
-      {menuOpen && <UserMenuDropdown onClose={() => setMenuOpen(false)} />}
+      {menuOpen && <UserMenuDropdown user={user} onClose={() => setMenuOpen(false)} />}
 
-      <div className="flex items-center justify-between px-2 mb-1.5">
-        <span className="text-[11px] font-bold text-gray-400 uppercase tracking-wider">Workspace</span>
-        <ChevronDown size={12} className="text-gray-300 dark:text-gray-600" />
-      </div>
-      <nav className="flex flex-col gap-0.5">
-        <Link
-          href="/dashboard"
-          className={`flex items-center gap-2.5 px-2 py-2 rounded-lg text-[13px] font-medium w-full transition-colors ${
-            tasksActive ? 'text-white' : 'text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800'
+      {/* ── Workspace collapsible section ── */}
+      <button
+        onClick={() => setWorkspaceOpen((v) => !v)}
+        className="flex items-center justify-between w-full h-8 px-3 rounded-xl mb-1
+                   text-sm font-medium text-gray-500 dark:text-gray-400
+                   hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+      >
+        <span>Workspace</span>
+        <ChevronDown
+          size={14}
+          className={`text-gray-400 dark:text-gray-500 transition-transform duration-200 ${
+            workspaceOpen ? '' : '-rotate-90'
           }`}
-          style={tasksActive ? { backgroundColor: 'var(--accent-color)' } : {}}
-        >
-          <CheckSquare size={15} className={tasksActive ? 'text-white shrink-0' : 'text-gray-600 dark:text-gray-400 shrink-0'} />
-          Tasks
-        </Link>
-        <Link
-          href="/dashboard/projects"
-          className={`flex items-center gap-2.5 px-2 py-2 rounded-lg text-[13px] font-medium w-full transition-colors ${
-            projectsActive ? 'text-white' : 'text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800'
-          }`}
-          style={projectsActive ? { backgroundColor: 'var(--accent-color)' } : {}}
-        >
-          <FolderKanban size={15} className={projectsActive ? 'text-white shrink-0' : 'text-gray-400 dark:text-gray-500 shrink-0'} />
-          Projects
-        </Link>
-      </nav>
+        />
+      </button>
+
+      {/* Collapsible nav items */}
+      {workspaceOpen && (
+        <nav className="flex flex-col gap-0.5">
+          <Link
+            href="/dashboard"
+            onClick={onClose}
+            className={`flex items-center gap-2 px-2 py-1.5 rounded-lg text-[13px] font-medium w-full transition-colors min-h-[40px] ${
+              tasksActive ? 'text-white' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 hover:text-gray-900'
+            }`}
+            style={tasksActive ? { backgroundColor: 'var(--accent-color)' } : {}}
+          >
+            <LayoutGrid size={14} className={tasksActive ? 'text-white shrink-0' : 'text-gray-500 dark:text-gray-400 shrink-0'} />
+            Tasks
+          </Link>
+          <Link
+            href="/dashboard/projects"
+            onClick={onClose}
+            className={`flex items-center gap-2 px-2 py-1.5 rounded-lg text-[13px] font-medium w-full transition-colors min-h-[40px] ${
+              projectsActive ? 'text-white' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 hover:text-gray-900'
+            }`}
+            style={projectsActive ? { backgroundColor: 'var(--accent-color)' } : {}}
+          >
+            <FolderOpen size={14} className={projectsActive ? 'text-white shrink-0' : 'text-gray-500 dark:text-gray-500 shrink-0'} />
+            Projects
+          </Link>
+        </nav>
+      )}
     </aside>
   );
 }

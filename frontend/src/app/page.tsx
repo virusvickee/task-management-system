@@ -192,6 +192,10 @@ export default function LoginPage() {
           color: #000000;
         }
 
+        :global(.dark) .login-brand-name {
+          color: #ffffff;
+        }
+
         /* ── Card ──────────────────────────────────────── */
         .login-card {
           width: 420px;
@@ -205,6 +209,12 @@ export default function LoginPage() {
           text-align: center;
           opacity: 1;
           box-shadow: var(--shadowxsoffset-x) var(--shadowxsoffset-y) var(--shadowxsblur-radius) var(--shadowxsspread-radius) var(--shadowxscolor);
+          background: var(--base-background, #FFFFFF);
+        }
+
+        :global(.dark) .login-card {
+          background: #111111;
+          border-color: rgba(255, 255, 255, 0.08);
         }
 
         /* ── Header ────────────────────────────────────── */
@@ -225,6 +235,10 @@ export default function LoginPage() {
           text-align: center;
           color: #000000;
           margin: 0;
+        }
+
+        :global(.dark) .login-heading {
+          color: #f5f5f5;
         }
 
         /* ── Subtext ───────────────────────────────────── */
@@ -379,21 +393,26 @@ export default function LoginPage() {
         }
 
         /* ── Responsive ────────────────────────────────── */
-        @media (max-width: 480px) {
+        @media (max-width: 640px) {
           .login-page {
-            padding: 24px 16px;
-            min-height: auto;
+            padding: 20px 16px;
             height: 100vh;
             height: 100dvh;
+            overflow-y: auto;
           }
 
           .login-card {
-            padding: 28px 20px 24px;
-            border-radius: 16px;
+            width: 100%;
+            padding: 24px 18px;
+            border-radius: 18px;
           }
 
           .login-heading {
-            font-size: 22px;
+            font-size: 20px;
+          }
+
+          .login-btn {
+            height: 44px;
           }
         }
       `}</style>

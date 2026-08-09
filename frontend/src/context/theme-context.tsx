@@ -40,7 +40,14 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
   // Hydrate from localStorage once mounted
   useEffect(() => {
     const storedTheme  = (localStorage.getItem(THEME_KEY)  as Theme | null) ?? 'light';
-    const storedAccent = (localStorage.getItem(ACCENT_KEY) as AccentColor | null) ?? 'Black';
+    let storedAccent   = (localStorage.getItem(ACCENT_KEY) as AccentColor | null) ?? 'Black';
+
+    // Migration: 'Amber' was never the intended default — reset to 'Black'
+    if (storedAccent === 'Amber') {
+      storedAccent = 'Black';
+      localStorage.setItem(ACCENT_KEY, 'Black');
+    }
+
     setThemeState(storedTheme);
     document.documentElement.classList.toggle('dark', storedTheme === 'dark');
     setAccentState(storedAccent);

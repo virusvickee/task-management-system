@@ -114,7 +114,7 @@ export default function ProjectTasksPage() {
 
   return (
     <div className="flex flex-col flex-1 min-w-0 overflow-hidden">
-      <header className="flex items-center justify-between px-5 py-3 border-b border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 shrink-0">
+      <header className="flex items-center justify-between w-full max-w-[1024px] mx-auto px-4 h-16 border-b border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 shrink-0">
         <div className="flex items-center gap-3 min-w-0">
           <button
             onClick={() => setSidebarOpen(!sidebarOpen)}
@@ -123,7 +123,12 @@ export default function ProjectTasksPage() {
           >
             {sidebarOpen ? <PanelLeftClose size={18} /> : <PanelLeftOpen size={18} />}
           </button>
-          <div className="flex flex-col justify-center gap-0.5 min-w-0">
+        </div>
+      </header>
+
+      {/* Title & Tools Row */}
+      <div className="flex items-center justify-between w-full max-w-[1024px] mx-auto px-4 py-4 bg-white dark:bg-gray-900 shrink-0">
+        <div className="flex flex-col justify-center gap-0.5 min-w-0">
           {/* Breadcrumb */}
           <nav className="flex items-center gap-1 text-[12px]" aria-label="Breadcrumb">
             <Link
@@ -150,7 +155,6 @@ export default function ProjectTasksPage() {
             )}
           </div>
         </div>
-      </div>
 
         <div className="flex items-center gap-2 shrink-0 ml-4">
           {searchOpen ? (
@@ -194,7 +198,7 @@ export default function ProjectTasksPage() {
             Add Task
           </button>
         </div>
-      </header>
+      </div>
 
       {/* Board / List */}
       {view === 'Board' ? (

@@ -1,4 +1,4 @@
-import { IsArray, IsEnum, IsNotEmpty, IsOptional, IsString } from 'class-validator';
+import { IsArray, IsBoolean, IsEnum, IsNotEmpty, IsObject, IsOptional, IsString } from 'class-validator';
 import { TaskPriority, TaskStatus } from '../schemas/task.schema';
 
 export class CreateTaskDto {
@@ -47,4 +47,21 @@ export class CreateTaskDto {
   @IsOptional()
   @IsString()
   projectId?: string;
+
+  @IsOptional()
+  @IsString()
+  team?: string;
+
+  @IsOptional()
+  @IsString()
+  parentTaskId?: string;
+
+  @IsOptional()
+  @IsBoolean()
+  locked?: boolean;
+
+  @IsOptional()
+  @IsArray()
+  @IsObject({ each: true })
+  resources?: { title: string; url: string }[];
 }

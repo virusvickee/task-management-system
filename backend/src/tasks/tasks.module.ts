@@ -4,6 +4,7 @@ import { JwtModule } from '@nestjs/jwt';
 import { Task, TaskSchema } from './schemas/task.schema';
 import { TasksService } from './tasks.service';
 import { TasksController } from './tasks.controller';
+import { UsersModule } from '../users/users.module';
 
 @Module({
   imports: [
@@ -11,6 +12,7 @@ import { TasksController } from './tasks.controller';
     JwtModule.register({
       secret: process.env.JWT_SECRET || 'dev-secret',
     }),
+    UsersModule,
   ],
   providers: [TasksService],
   controllers: [TasksController],

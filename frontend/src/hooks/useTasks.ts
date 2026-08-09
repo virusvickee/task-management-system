@@ -15,6 +15,19 @@ export interface Task {
   endDate?: string;
   dueDate?: string;
   projectId?: string;
+  parentTaskId?: string;
+  team?: string;
+  reporterName?: string;
+  locked?: boolean;
+  resources?: { title: string; url: string }[];
+  comments?: {
+    _id?: string;
+    author: string;
+    text: string;
+    createdAt: string;
+    reactions?: string[];
+    attachments?: { name: string; dataUrl: string; type: string }[];
+  }[];
 }
 
 export const STATUSES = ['To Do', 'Doing', 'Completed', 'On Hold'] as const;

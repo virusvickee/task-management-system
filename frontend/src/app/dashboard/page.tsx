@@ -98,38 +98,60 @@ export default function DashboardPage() {
 
   return (
     <div className="flex flex-col flex-1 min-w-0 overflow-hidden">
-      <header className="flex items-center justify-between px-5 py-3 border-b border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 shrink-0">
-        <div className="flex items-center gap-3">
-          <button onClick={() => setSidebarOpen((v) => !v)} className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors" aria-label="Toggle sidebar">
-            {sidebarOpen ? <PanelLeftClose size={18} /> : <PanelLeftOpen size={18} />}
-          </button>
-          <h1 className="text-xl font-bold text-gray-900 dark:text-gray-100">Tasks</h1>
+      {/* ── Top header bar ── */}
+      <header className="flex items-center w-full px-3 sm:px-4 h-14 border-b border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 shrink-0">
+        <button
+          onClick={() => setSidebarOpen((v) => !v)}
+          className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors
+                     min-w-[40px] min-h-[40px] flex items-center justify-center rounded-md
+                     hover:bg-gray-50 dark:hover:bg-gray-800"
+          aria-label="Toggle sidebar"
+        >
+          {sidebarOpen ? <PanelLeftClose size={17} /> : <PanelLeftOpen size={17} />}
+        </button>
+      </header>
+
+      {/* ── Title & Tools Row ── */}
+      <div className="flex items-center justify-between w-full px-3 sm:px-4 py-3 gap-2 bg-white dark:bg-gray-900 shrink-0 border-b border-gray-100 dark:border-gray-800/60">
+        {/* Left: title + result count */}
+        <div className="flex items-center gap-2 min-w-0 shrink-0">
+          <h1 className="text-base sm:text-lg font-bold text-gray-900 dark:text-gray-100 truncate">Tasks</h1>
           {hasActiveFilters && (
-            <span className="text-[12px] text-gray-400 dark:text-gray-500">
+            <span className="text-[11px] text-gray-400 dark:text-gray-500 whitespace-nowrap">
               {Object.values(filteredByColumn).flat().length} results
             </span>
           )}
         </div>
-        <div className="flex items-center gap-2">
+
+        {/* Right: tools — always visible, wraps gracefully */}
+        <div className="flex items-center gap-1 sm:gap-1.5 flex-shrink-0">
+          {/* Search — expands inline on sm+, icon-only on xs */}
           {searchOpen ? (
-            <div className="flex items-center gap-2 px-3 py-1.5 w-[300px] border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800">
-              <Search size={14} className="text-gray-400 shrink-0" />
+            <div className="flex items-center gap-2 px-2.5 py-1.5 w-[180px] sm:w-[240px] border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800">
+              <Search size={13} className="text-gray-400 shrink-0" />
               <input
                 ref={searchRef}
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 onKeyDown={(e) => e.key === 'Escape' && closeSearch()}
                 onBlur={closeSearch}
-                placeholder="Search tasks..."
-                className="flex-1 text-[13px] text-gray-800 dark:text-gray-200 placeholder-gray-400 outline-none bg-transparent"
+                placeholder="Search tasks…"
+                className="flex-1 text-[13px] text-gray-800 dark:text-gray-200 placeholder-gray-400 outline-none bg-transparent min-w-0"
               />
-              <span className="text-[11px] text-gray-500 bg-gray-100 dark:bg-gray-700 dark:text-gray-400 rounded px-1.5 py-0.5 font-medium shrink-0 select-none">⌘F</span>
             </div>
           ) : (
-            <button onClick={openSearch} className="p-1.5 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors rounded-md hover:bg-gray-50 dark:hover:bg-gray-800">
-              <Search size={16} />
+            <button
+              onClick={openSearch}
+              className="min-w-[40px] min-h-[40px] flex items-center justify-center text-gray-400
+                         hover:text-gray-600 dark:hover:text-gray-300 transition-colors rounded-md
+                         hover:bg-gray-50 dark:hover:bg-gray-800"
+              aria-label="Search"
+            >
+              <Search size={15} />
             </button>
           )}
+
+          {/* Fields dropdown (contains view toggle + field visibility + filters) */}
           <FieldsDropdown
             view={view}
             onViewChange={setView}
@@ -138,25 +160,43 @@ export default function DashboardPage() {
             filters={filters}
             onFiltersChange={setFilters}
           />
-          <button className="p-1.5 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors rounded-lg border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800">
-            <Filter size={15} />
+
+          {/* Filter button */}
+          <button
+            className="min-w-[40px] min-h-[40px] flex items-center justify-center text-gray-400
+                       hover:text-gray-600 dark:hover:text-gray-300 transition-colors rounded-lg
+                       border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800"
+            aria-label="Filter"
+          >
+            <Filter size={14} />
           </button>
+
+          {/* Add Task — always visible, label hidden on very small screens */}
           <button
             onClick={() => createTask('New Task', 'To Do')}
-            className="flex items-center gap-1.5 px-3 py-1.5 text-[13px] text-white font-medium rounded-lg hover:opacity-90 transition-opacity"
+            className="flex items-center gap-1 sm:gap-1.5 px-2 sm:px-3 py-1.5 text-[13px] text-white
+                       font-semibold rounded-lg hover:opacity-90 transition-opacity min-h-[40px] whitespace-nowrap"
             style={{ backgroundColor: 'var(--accent-color)' }}
           >
             <Plus size={14} />
-            Add Task
+            <span className="hidden xs:inline sm:inline">Add Task</span>
           </button>
         </div>
-      </header>
+      </div>
 
       {view === 'Board' ? (
-        <div className="flex-1 overflow-x-auto overflow-y-auto bg-gray-50 dark:bg-gray-950">
-          <div className="flex gap-6 p-6 min-h-full items-start">
+        <div className="flex-1 overflow-x-auto overflow-y-hidden bg-white dark:bg-gray-950">
+          <div className="flex gap-3 p-3 sm:p-4 h-full items-start"
+               style={{ minWidth: 'max-content' }}>
             {STATUSES.filter((s) => !hasActiveFilters || filteredByColumn[s].length > 0).map((status) => (
-              <KanbanCol key={status} title={status} tasks={filteredByColumn[status]} onDrop={handleDrop} onAddTask={createTask} fields={fields} />
+              <KanbanCol
+                key={status}
+                title={status}
+                tasks={filteredByColumn[status]}
+                onDrop={handleDrop}
+                onAddTask={createTask}
+                fields={fields}
+              />
             ))}
           </div>
         </div>

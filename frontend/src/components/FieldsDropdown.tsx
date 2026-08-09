@@ -199,7 +199,7 @@ export default function FieldsDropdown({
       </button>
 
       {open && (
-        <div className="absolute right-0 top-full mt-1.5 w-[220px] bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl shadow-lg z-50 py-2">
+        <div className="absolute right-0 top-full mt-1.5 w-[220px] bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl shadow-lg z-[9999] py-2 select-none">
           {/* View toggle */}
           <div className="mx-2 mb-2 p-0.5 bg-gray-100 dark:bg-gray-800 rounded-lg flex">
             {(['List', 'Board'] as const).map((t) => (
@@ -246,7 +246,7 @@ export default function FieldsDropdown({
 
                 {/* ── Priority submenu ── */}
                 {isActive && key === 'priority' && (
-                  <div className="absolute left-full top-0 ml-1 w-48 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl shadow-lg py-1.5 z-50">
+                  <div className="absolute left-full top-0 ml-1 w-48 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl shadow-lg py-1.5 z-[9999]">
                     {PRIORITY_OPTIONS.map((p) => (
                       <button
                         key={p.label}
@@ -263,7 +263,7 @@ export default function FieldsDropdown({
 
                 {/* ── Status submenu ── */}
                 {isActive && key === 'status' && (
-                  <div className="absolute left-full top-0 ml-1 w-48 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl shadow-lg py-1.5 z-50">
+                  <div className="absolute left-full top-0 ml-1 w-48 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl shadow-lg py-1.5 z-[9999]">
                     {STATUS_OPTIONS.map((s) => (
                       <button
                         key={s.label}
@@ -297,7 +297,7 @@ export default function FieldsDropdown({
 
                 {/* ── Due Date submenu ── */}
                 {isActive && key === 'dueDate' && (
-                  <div className="absolute left-full top-0 ml-1 w-[160px] bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl shadow-lg py-1.5 z-50">
+                  <div className="absolute left-full top-0 ml-1 w-[160px] bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl shadow-lg py-1.5 z-[9999]">
                     {DUE_DATE_OPTIONS.map((d) => (
                       <button
                         key={d.value}

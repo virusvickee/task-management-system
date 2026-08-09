@@ -15,4 +15,8 @@ export class UsersService {
   async findById(id: string) {
     return this.userModel.findById(id).exec();
   }
+
+  async updateProfile(id: string, dto: any) {
+    return this.userModel.findByIdAndUpdate(id, { $set: dto }, { new: true }).exec();
+  }
 }

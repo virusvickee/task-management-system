@@ -13,6 +13,12 @@ export class User {
 
   @Prop()
   email?: string;
+
+  @Prop()
+  title?: string;
+
+  @Prop({ sparse: true, unique: true })
+  username?: string;
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);

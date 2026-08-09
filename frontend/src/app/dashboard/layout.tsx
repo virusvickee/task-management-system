@@ -13,26 +13,36 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
   return (
     <div className="flex h-screen bg-white dark:bg-gray-950 overflow-hidden relative">
-      {/* Mobile/Tablet Drawer Backdrop */}
+      {/* ── Mobile/Tablet backdrop (only below lg) ── */}
       {sidebarOpen && (
         <div
           onClick={() => setSidebarOpen(false)}
-          className="fixed inset-0 bg-black/30 dark:bg-black/50 z-40 md:hidden transition-opacity duration-200"
+          className="fixed inset-0 bg-black/40 dark:bg-black/60 z-40 lg:hidden"
           aria-hidden="true"
         />
       )}
 
-      {/* Sidebar container */}
+      {/* ── Sidebar ──
+          • Mobile/tablet (<lg): fixed off-canvas drawer, slides in over content
+          • Desktop (≥lg): static inline column, always visible
+      ── */}
       <div
-        className={`fixed inset-y-0 left-0 z-50 md:relative md:z-0 flex transition-transform duration-200 ease-in-out md:translate-x-0 ${
-          sidebarOpen ? 'translate-x-0' : '-translate-x-full md:hidden'
-        }`}
+        className={[
+          // Shared
+          'flex shrink-0 h-full',
+          // Mobile/tablet: fixed overlay drawer
+          'fixed inset-y-0 left-0 z-50',
+          'transition-transform duration-200 ease-in-out',
+          sidebarOpen ? 'translate-x-0' : '-translate-x-full',
+          // Desktop: static, part of normal flow
+          'lg:relative lg:translate-x-0 lg:z-auto',
+        ].join(' ')}
       >
-        <Sidebar />
+        <Sidebar onClose={() => setSidebarOpen(false)} />
       </div>
 
-      {/* Main page content area */}
-      <div className="flex-1 flex flex-col min-w-0 h-full relative">
+      {/* ── Main content ── */}
+      <div className="flex-1 flex flex-col min-w-0 h-full overflow-hidden">
         {children}
       </div>
     </div>

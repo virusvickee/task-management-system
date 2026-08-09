@@ -1,12 +1,13 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, type CSSProperties } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 
 interface DatePickerPopoverProps {
   selectedDate: string | null;
   onSelectDate: (dateStr: string) => void;
   onClose: () => void;
+  anchorRef?: React.RefObject<HTMLElement | null>;
 }
 
 export function parseDateString(str: string | null): Date | null {
@@ -38,18 +39,35 @@ export function formatPillDate(dateStr: string | null): string | null {
   return parsed.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
 }
 
+export function formatFullDate(dateStr: string | null): string | null {
+  const parsed = parseDateString(dateStr);
+  if (!parsed) return null;
+  return parsed.toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric' });
+}
+
 export default function DatePickerPopover({
   selectedDate,
   onSelectDate,
   onClose,
+  anchorRef,
 }: DatePickerPopoverProps) {
   const popoverRef = useRef<HTMLDivElement>(null);
+  const [position, setPosition] = useState<{ top: number; left: number } | null>(null);
 
   const initialDate = parseDateString(selectedDate) || new Date();
   const [viewYear, setViewYear] = useState<number>(initialDate.getFullYear());
   const [viewMonth, setViewMonth] = useState<number>(initialDate.getMonth());
 
   useEffect(() => {
+    // Use the passed anchorRef (trigger button) to position the popover
+    const anchor = anchorRef?.current;
+    if (anchor) {
+      const rect = anchor.getBoundingClientRect();
+      setPosition({
+        top: Math.min(rect.bottom + 6, window.innerHeight - 270),
+        left: Math.max(8, Math.min(rect.left + rect.width / 2 - 100, window.innerWidth - 216)),
+      });
+    }
     const handleMouseDown = (e: MouseEvent) => {
       if (popoverRef.current && !popoverRef.current.contains(e.target as Node)) {
         onClose();
@@ -149,28 +167,31 @@ export default function DatePickerPopover({
   const selectedDateStr = parsedSelected ? formatDateToYYYYMMDD(parsedSelected) : null;
 
   return (
-    <div className="fixed inset-0 sm:absolute sm:inset-auto sm:-left-12 sm:top-full z-50 flex items-center justify-center sm:block p-4 sm:p-0 sm:mt-2 bg-black/20 sm:bg-transparent">
+    <div
+      className="calendar-popover fixed z-[9999]"
+      style={position ? ({ top: `${position.top}px`, left: `${position.left}px` } as CSSProperties) : { top: '-9999px', left: '-9999px' }}
+    >
       <div
         ref={popoverRef}
-        className="w-[280px] max-w-[calc(100vw-2rem)] bg-white border border-gray-200/80 rounded-2xl shadow-[0_12px_36px_rgba(0,0,0,0.12)] p-4 select-none"
+        className="w-[200px] h-[250px] max-w-[calc(100vw-1.5rem)] max-h-[calc(100vh-1.5rem)] overflow-hidden bg-white dark:bg-gray-900 border border-gray-200/80 dark:border-gray-800 rounded-md shadow-[0_12px_36px_rgba(0,0,0,0.12)] dark:shadow-[0_12px_36px_rgba(0,0,0,0.4)] p-3 select-none flex flex-col gap-3"
       >
         {/* Header row */}
-        <div className="flex items-center justify-between mb-3 px-1">
+        <div className="flex items-center justify-between px-1">
           <button
             type="button"
             onClick={handlePrevMonth}
-            className="p-1 text-gray-800 hover:bg-gray-100 rounded-lg transition-colors"
+            className="p-1 text-gray-500 dark:text-gray-400 hover:text-gray-900 hover:bg-gray-100 dark:hover:text-gray-100 dark:hover:bg-gray-800 rounded-md transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent-color)]"
             aria-label="Previous month"
           >
             <ChevronLeft size={18} />
           </button>
-          <span className="text-[15px] font-medium text-gray-900">
+          <span className="text-[15px] font-medium text-gray-900 dark:text-gray-100">
             {monthName} {viewYear}
           </span>
           <button
             type="button"
             onClick={handleNextMonth}
-            className="p-1 text-gray-800 hover:bg-gray-100 rounded-lg transition-colors"
+            className="p-1 text-gray-500 dark:text-gray-400 hover:text-gray-900 hover:bg-gray-100 dark:hover:text-gray-100 dark:hover:bg-gray-800 rounded-md transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent-color)]"
             aria-label="Next month"
           >
             <ChevronRight size={18} />
@@ -178,16 +199,16 @@ export default function DatePickerPopover({
         </div>
 
         {/* Weekday headers */}
-        <div className="grid grid-cols-7 mb-2 text-center">
+        <div className="grid grid-cols-7 text-center">
           {['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'].map((day) => (
-            <span key={day} className="text-[13px] font-normal text-gray-400 py-0.5">
+            <span key={day} className="text-[11px] font-normal text-gray-400 dark:text-gray-500">
               {day}
             </span>
           ))}
         </div>
 
         {/* Days grid */}
-        <div className="grid grid-cols-7 gap-y-1.5 justify-items-center">
+        <div className="grid grid-cols-7 gap-y-1 justify-items-center flex-1 content-between">
           {days.map((item, index) => {
             const isSelected = selectedDateStr === item.dateStr;
             const isToday = todayStr === item.dateStr;
@@ -204,14 +225,14 @@ export default function DatePickerPopover({
                   onSelectDate(item.dateStr);
                   onClose();
                 }}
-                className={`w-9 h-9 text-[14px] font-normal flex items-center justify-center rounded-full transition-colors ${
+                className={`w-5 h-5 text-[11px] font-normal flex items-center justify-center rounded-full transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent-color)] ${
                   isSelected
                     ? 'text-white font-medium shadow-sm'
                     : isToday
-                    ? 'bg-gray-100 text-gray-900 font-medium hover:bg-gray-200'
+                    ? 'bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-100 font-medium hover:bg-gray-200 dark:hover:bg-gray-700'
                     : item.isCurrentMonth
-                    ? 'text-gray-900 hover:bg-gray-100'
-                    : 'text-gray-400 hover:bg-gray-100'
+                    ? 'text-gray-900 dark:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-800'
+                    : 'text-gray-400 dark:text-gray-600 hover:bg-gray-100 dark:hover:bg-gray-800'
                 }`}
                 style={isSelected ? { backgroundColor: 'var(--accent-color)' } : undefined}
               >
