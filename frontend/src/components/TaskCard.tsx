@@ -1,3 +1,5 @@
+'use client';
+
 import { CalendarDays, MoreHorizontal, Tag } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import type { Task } from '@/hooks/useTasks';

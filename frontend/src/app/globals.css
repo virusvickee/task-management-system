@@ -142,6 +142,27 @@ h4 {
   width: 100%;
 }
 
+/* ── Prevent any page-level horizontal overflow ── */
+html, body {
+  overflow-x: hidden;
+  max-width: 100vw;
+}
+
+/* ── Hide scrollbars on settings nav tab bar ── */
+.scrollbar-none {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.scrollbar-none::-webkit-scrollbar {
+  display: none;
+}
+
+/* ── Kanban: smooth touch scroll ── */
+.kanban-scroll {
+  -webkit-overflow-scrolling: touch;
+  scroll-snap-type: x proximity;
+}
+
 @media (max-width: 639px) {
   .calendar-popover > div {
     width: 184px !important;
@@ -367,7 +388,7 @@ header:has(h1) + div > aside::-webkit-scrollbar {
     font-weight: 700;
   }
 
-  header:has(h1) + div > main > div:nth-of-type(4) > div > table {
+  header:has(h1) + div > main > div:nth-of-type(4) > div > div > table {
     border: 1px solid rgb(229 231 235);
     border-bottom: 0;
     border-collapse: separate;
@@ -376,17 +397,17 @@ header:has(h1) + div > aside::-webkit-scrollbar {
     overflow: hidden;
   }
 
-  .dark header:has(h1) + div > main > div:nth-of-type(4) > div > table {
+  .dark header:has(h1) + div > main > div:nth-of-type(4) > div > div > table {
     border-color: rgb(31 41 55);
   }
 
-  header:has(h1) + div > main > div:nth-of-type(4) > div > table + div {
+  header:has(h1) + div > main > div:nth-of-type(4) > div > div > table + div {
     border: 1px solid rgb(229 231 235);
     border-top: 0;
     border-radius: 0 0 0.5rem 0.5rem;
   }
 
-  .dark header:has(h1) + div > main > div:nth-of-type(4) > div > table + div {
+  .dark header:has(h1) + div > main > div:nth-of-type(4) > div > div > table + div {
     border-color: rgb(31 41 55);
   }
 }

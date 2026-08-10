@@ -6,19 +6,27 @@ import { AppModule } from './app.module';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
-  const allowedOrigins = [
-    'http://localhost:3000',
-    'http://localhost:3001',
-    process.env.CORS_ORIGIN,
-  ].filter(Boolean);
+  const isProd = process.env.NODE_ENV === 'production';
+
+  // In production, CORS_ORIGIN must be set — no silent localhost fallback.
+  // In development, localhost ports are allowed for convenience.
+  const allowedOrigins: string[] = [
+    ...(isProd ? [] : ['http://localhost:3000', 'http://localhost:3001']),
+    ...(process.env.CORS_ORIGIN ? [process.env.CORS_ORIGIN] : []),
+  ];
+
+  if (isProd && allowedOrigins.length === 0) {
+    console.warn('WARNING: CORS_ORIGIN is not set. All cross-origin requests will be blocked.');
+  }
 
   app.enableCors({
     origin: (origin, callback) => {
-      if (!origin || allowedOrigins.includes(origin) || /^http:\/\/localhost:\d+$/.test(origin)) {
-        callback(null, true);
-      } else {
-        callback(null, false);
-      }
+      // Allow same-origin (no Origin header) and server-to-server calls
+      if (!origin) return callback(null, true);
+      if (allowedOrigins.includes(origin)) return callback(null, true);
+      // Dev-only: allow any localhost port
+      if (!isProd && /^http:\/\/localhost:\d+$/.test(origin)) return callback(null, true);
+      callback(null, false);
     },
     credentials: true,
   });
@@ -34,7 +42,7 @@ async function bootstrap() {
   app.setGlobalPrefix('api');
 
   const port = process.env.PORT || 4000;
-  await app.listen(port);
-  console.log(`Backend running on http://localhost:${port}/api`);
+  await app.listen(port, '0.0.0.0');
+  console.log(`Backend running on port ${port}`);
 }
 bootstrap();

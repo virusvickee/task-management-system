@@ -112,7 +112,7 @@ export default function DashboardPage() {
       </header>
 
       {/* ── Title & Tools Row ── */}
-      <div className="flex items-center justify-between w-full px-3 sm:px-4 py-3 gap-2 bg-white dark:bg-gray-900 shrink-0 border-b border-gray-100 dark:border-gray-800/60">
+      <div className="flex items-center justify-between w-full px-3 sm:px-4 py-3 gap-2 bg-white dark:bg-gray-900 shrink-0 border-b border-gray-100 dark:border-gray-800/60 flex-wrap">
         {/* Left: title + result count */}
         <div className="flex items-center gap-2 min-w-0 shrink-0">
           <h1 className="text-base sm:text-lg font-bold text-gray-900 dark:text-gray-100 truncate">Tasks</h1>
@@ -123,11 +123,11 @@ export default function DashboardPage() {
           )}
         </div>
 
-        {/* Right: tools — always visible, wraps gracefully */}
-        <div className="flex items-center gap-1 sm:gap-1.5 flex-shrink-0">
-          {/* Search — expands inline on sm+, icon-only on xs */}
+        {/* Right: tools */}
+        <div className="flex items-center gap-1 sm:gap-1.5 shrink-0">
+          {/* Search */}
           {searchOpen ? (
-            <div className="flex items-center gap-2 px-2.5 py-1.5 w-[180px] sm:w-[240px] border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800">
+            <div className="flex items-center gap-2 px-2.5 py-1.5 w-[160px] sm:w-[240px] border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800">
               <Search size={13} className="text-gray-400 shrink-0" />
               <input
                 ref={searchRef}
@@ -151,7 +151,7 @@ export default function DashboardPage() {
             </button>
           )}
 
-          {/* Fields dropdown (contains view toggle + field visibility + filters) */}
+          {/* Fields dropdown */}
           <FieldsDropdown
             view={view}
             onViewChange={setView}
@@ -171,7 +171,7 @@ export default function DashboardPage() {
             <Filter size={14} />
           </button>
 
-          {/* Add Task — always visible, label hidden on very small screens */}
+          {/* Add Task — always visible */}
           <button
             onClick={() => createTask('New Task', 'To Do')}
             className="flex items-center gap-1 sm:gap-1.5 px-2 sm:px-3 py-1.5 text-[13px] text-white
@@ -179,15 +179,17 @@ export default function DashboardPage() {
             style={{ backgroundColor: 'var(--accent-color)' }}
           >
             <Plus size={14} />
-            <span className="hidden xs:inline sm:inline">Add Task</span>
+            <span>Add Task</span>
           </button>
         </div>
       </div>
 
       {view === 'Board' ? (
         <div className="flex-1 overflow-x-auto overflow-y-hidden bg-white dark:bg-gray-950">
-          <div className="flex gap-3 p-3 sm:p-4 h-full items-start"
-               style={{ minWidth: 'max-content' }}>
+          <div
+            className="flex gap-3 h-full items-start"
+            style={{ minWidth: 'max-content', padding: '12px 16px' }}
+          >
             {STATUSES.filter((s) => !hasActiveFilters || filteredByColumn[s].length > 0).map((status) => (
               <KanbanCol
                 key={status}

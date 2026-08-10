@@ -59,7 +59,7 @@ function UserMenuDropdown({ user, onClose }: { user?: { name?: string; email?: s
           </button>
           {submenu === 'theme' && (
             <div
-              className="absolute left-full top-0 ml-1 w-[192px] min-w-[192px] rounded-md border border-gray-200 dark:border-gray-700 py-1.5 z-[9999] select-none"
+              className="absolute left-0 top-full mt-0.5 w-[192px] max-w-[calc(100vw-24px)] rounded-md border border-gray-200 dark:border-gray-700 py-1.5 z-[9999] select-none lg:left-full lg:top-0 lg:mt-0 lg:ml-1"
               style={{
                 background: 'var(--base-popover, rgba(255, 255, 255, 1))',
                 borderTop: '1px solid var(--custom-foreground-5, rgba(10, 10, 10, 0.05))',
@@ -96,7 +96,7 @@ function UserMenuDropdown({ user, onClose }: { user?: { name?: string; email?: s
           </button>
           {submenu === 'color' && (
             <div
-              className="absolute left-full top-0 ml-1 w-[192px] min-w-[192px] rounded-md border border-gray-200 dark:border-gray-700 py-1.5 z-[9999] select-none"
+              className="absolute left-0 top-full mt-0.5 w-[192px] max-w-[calc(100vw-24px)] rounded-md border border-gray-200 dark:border-gray-700 py-1.5 z-[9999] select-none lg:left-full lg:top-0 lg:mt-0 lg:ml-1"
               style={{
                 background: 'var(--base-popover, rgba(255, 255, 255, 1))',
                 borderTop: '1px solid var(--custom-foreground-5, rgba(10, 10, 10, 0.05))',

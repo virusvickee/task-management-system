@@ -131,7 +131,7 @@ export default function ProjectsPage() {
             style={{ backgroundColor: 'var(--accent-color)' }}
           >
             <Plus size={14} />
-            <span className="hidden xs:inline sm:inline">Add Project</span>
+            <span>Add Project</span>
           </button>
         </div>
       </div>

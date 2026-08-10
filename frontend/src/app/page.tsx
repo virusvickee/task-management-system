@@ -395,14 +395,22 @@ export default function LoginPage() {
         /* ── Responsive ────────────────────────────────── */
         @media (max-width: 640px) {
           .login-page {
-            padding: 20px 16px;
+            padding: 40px 16px 24px;
             height: 100vh;
             height: 100dvh;
             overflow-y: auto;
+            overflow-x: hidden;
+            align-items: flex-start;
+          }
+
+          .login-container {
+            width: 100%;
+            max-width: 100%;
           }
 
           .login-card {
             width: 100%;
+            max-width: 100%;
             padding: 24px 18px;
             border-radius: 18px;
           }

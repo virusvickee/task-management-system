@@ -101,28 +101,28 @@ function ProfileSection() {
             <div className="flex items-center justify-between px-5 py-4">
               <span className="text-[13px] text-gray-700 dark:text-gray-300 font-medium">Email</span>
               <div className="flex items-center gap-2">
-                <span className="text-[13px] text-gray-500 dark:text-gray-400">{profile.email || 'dexter@gmail.com'}</span>
-                <button className="p-1 rounded hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors" title="Read only">
+                <span className="text-[13px] text-gray-500 dark:text-gray-400 truncate max-w-[160px] sm:max-w-none">{profile.email || 'dexter@gmail.com'}</span>
+                <button className="p-1 rounded hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors shrink-0" title="Read only">
                   <Pencil size={13} className="text-gray-400 opacity-60" />
                 </button>
               </div>
             </div>
 
             {/* Full name */}
-            <div className="flex items-center justify-between gap-3 px-5 py-4">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 px-5 py-4">
               <span className="text-[13px] text-gray-700 dark:text-gray-300 font-medium shrink-0">Full name</span>
               <input
                 value={profile.name}
                 onChange={(e) => setProfile((p) => ({ ...p, name: e.target.value }))}
                 onBlur={(e) => updateField('name', e.target.value)}
                 className="text-[13px] text-gray-700 dark:text-gray-200 bg-gray-100 dark:bg-gray-800
-                           rounded-lg px-3 py-1.5 w-full max-w-[200px] text-right outline-none
+                           rounded-lg px-3 py-1.5 w-full sm:max-w-[200px] sm:text-right outline-none
                            focus:ring-1 focus:ring-gray-300 dark:focus:ring-gray-600 font-medium"
               />
             </div>
 
             {/* Title */}
-            <div className="flex items-center justify-between gap-3 px-5 py-4">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 px-5 py-4">
               <div className="shrink-0">
                 <p className="text-[13px] text-gray-700 dark:text-gray-300 font-medium">Title</p>
                 <p className="text-[11px] text-gray-400 mt-0.5">Your job title or role</p>
@@ -133,14 +133,14 @@ function ProfileSection() {
                 onBlur={(e) => updateField('title', e.target.value)}
                 placeholder="Designer"
                 className="text-[13px] text-gray-700 dark:text-gray-200 bg-gray-100 dark:bg-gray-800
-                           rounded-lg px-3 py-1.5 w-full max-w-[200px] text-right outline-none
+                           rounded-lg px-3 py-1.5 w-full sm:max-w-[200px] sm:text-right outline-none
                            focus:ring-1 focus:ring-gray-300 dark:focus:ring-gray-600
                            placeholder:text-gray-400 font-medium"
               />
             </div>
 
             {/* Username */}
-            <div className="flex items-center justify-between gap-3 px-5 py-4">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 px-5 py-4">
               <div className="shrink-0">
                 <p className="text-[13px] text-gray-700 dark:text-gray-300 font-medium">Username</p>
                 <p className="text-[11px] text-gray-400 mt-0.5">One word, like a nickname or first name</p>
@@ -151,7 +151,7 @@ function ProfileSection() {
                 onBlur={(e) => updateField('username', e.target.value)}
                 placeholder="Dexuser"
                 className="text-[13px] text-gray-700 dark:text-gray-200 bg-gray-100 dark:bg-gray-800
-                           rounded-lg px-3 py-1.5 w-full max-w-[200px] text-right outline-none
+                           rounded-lg px-3 py-1.5 w-full sm:max-w-[200px] sm:text-right outline-none
                            focus:ring-1 focus:ring-gray-300 dark:focus:ring-gray-600
                            placeholder:text-gray-400 font-medium"
               />
@@ -161,11 +161,11 @@ function ProfileSection() {
           {/* Workspace access */}
           <p className="text-[13px] font-semibold text-gray-700 dark:text-gray-300 mb-3">Workspace access</p>
           <div className="border border-gray-200 dark:border-gray-700 rounded-xl bg-white dark:bg-gray-900">
-            <div className="flex items-center justify-between px-5 py-4">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 px-5 py-4">
               <span className="text-[13px] text-gray-400">Remove yourself from the workspace</span>
               <button
                 onClick={handleLeaveWorkspace}
-                className="text-[13px] font-medium text-red-600 bg-red-50 hover:bg-red-100 dark:bg-red-950/40 dark:hover:bg-red-900/60 dark:text-red-400 transition-colors px-3 py-1.5 rounded-lg"
+                className="text-[13px] font-medium text-red-600 bg-red-50 hover:bg-red-100 dark:bg-red-950/40 dark:hover:bg-red-900/60 dark:text-red-400 transition-colors px-3 py-1.5 rounded-lg self-start sm:self-auto whitespace-nowrap min-h-[40px]"
               >
                 Leave Workspace
               </button>
@@ -286,7 +286,7 @@ export default function SettingsPage() {
 
       {/* ── Content ── */}
       <main className="flex-1 overflow-y-auto p-4 sm:p-6 md:p-8 flex justify-center items-start w-full min-w-0">
-        <div className="w-full max-w-[640px] min-h-0 md:min-h-[708px] border border-gray-200
+        <div className="w-full max-w-[640px] min-h-0 border border-gray-200
                         dark:border-gray-800 rounded-xl bg-white dark:bg-gray-900 p-4 sm:p-6
                         shadow-sm flex flex-col">
           {active === 'profile' && <ProfileSection />}

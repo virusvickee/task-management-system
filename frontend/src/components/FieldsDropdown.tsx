@@ -84,7 +84,7 @@ function MultiSelectSubmenu({
   renderOption?: (v: string) => React.ReactNode;
 }) {
   return (
-    <div className="absolute left-full top-0 ml-1 min-w-[180px] bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl shadow-lg py-1.5 z-50">
+    <div className="absolute bottom-0 left-0 min-w-[180px] bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl shadow-lg py-1.5 z-[9999] translate-y-full sm:translate-y-0 sm:bottom-auto sm:top-0 sm:left-full">
       {options.map((opt) => (
         <button
           key={opt}
@@ -176,7 +176,7 @@ export default function FieldsDropdown({
       {/* Trigger button */}
       <button
         onClick={() => { setOpen((v) => !v); setActiveField(null); }}
-        className={`flex items-center gap-1.5 px-3 py-1.5 text-[13px] font-medium border rounded-lg transition-colors ${
+        className={`flex items-center gap-1.5 px-3 py-1.5 text-[13px] font-medium border rounded-lg transition-colors min-h-[40px] ${
           open || totalActive > 0
             ? 'bg-gray-100 dark:bg-gray-800 border-gray-300 dark:border-gray-600 text-gray-800 dark:text-gray-200'
             : 'border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800'
@@ -246,7 +246,7 @@ export default function FieldsDropdown({
 
                 {/* ── Priority submenu ── */}
                 {isActive && key === 'priority' && (
-                  <div className="absolute left-full top-0 ml-1 w-48 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl shadow-lg py-1.5 z-[9999]">
+                  <div className="absolute bottom-0 left-0 w-48 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl shadow-lg py-1.5 z-[9999] translate-y-full sm:translate-y-0 sm:bottom-auto sm:top-0 sm:left-full">
                     {PRIORITY_OPTIONS.map((p) => (
                       <button
                         key={p.label}
@@ -263,7 +263,7 @@ export default function FieldsDropdown({
 
                 {/* ── Status submenu ── */}
                 {isActive && key === 'status' && (
-                  <div className="absolute left-full top-0 ml-1 w-48 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl shadow-lg py-1.5 z-[9999]">
+                  <div className="absolute bottom-0 left-0 w-48 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl shadow-lg py-1.5 z-[9999] translate-y-full sm:translate-y-0 sm:bottom-auto sm:top-0 sm:left-full">
                     {STATUS_OPTIONS.map((s) => (
                       <button
                         key={s.label}
@@ -297,7 +297,7 @@ export default function FieldsDropdown({
 
                 {/* ── Due Date submenu ── */}
                 {isActive && key === 'dueDate' && (
-                  <div className="absolute left-full top-0 ml-1 w-[160px] bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl shadow-lg py-1.5 z-[9999]">
+                  <div className="absolute bottom-0 left-0 w-[160px] bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl shadow-lg py-1.5 z-[9999] translate-y-full sm:translate-y-0 sm:bottom-auto sm:top-0 sm:left-full">
                     {DUE_DATE_OPTIONS.map((d) => (
                       <button
                         key={d.value}

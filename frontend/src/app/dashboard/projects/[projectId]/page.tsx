@@ -114,21 +114,21 @@ export default function ProjectTasksPage() {
 
   return (
     <div className="flex flex-col flex-1 min-w-0 overflow-hidden">
-      <header className="flex items-center justify-between w-full max-w-[1024px] mx-auto px-4 h-16 border-b border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 shrink-0">
-        <div className="flex items-center gap-3 min-w-0">
-          <button
-            onClick={() => setSidebarOpen(!sidebarOpen)}
-            className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors shrink-0"
-            aria-label="Toggle sidebar"
-          >
-            {sidebarOpen ? <PanelLeftClose size={18} /> : <PanelLeftOpen size={18} />}
-          </button>
-        </div>
+      <header className="flex items-center w-full px-3 sm:px-4 h-14 border-b border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 shrink-0">
+        <button
+          onClick={() => setSidebarOpen(!sidebarOpen)}
+          className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors
+                     min-w-[40px] min-h-[40px] flex items-center justify-center rounded-md
+                     hover:bg-gray-50 dark:hover:bg-gray-800"
+          aria-label="Toggle sidebar"
+        >
+          {sidebarOpen ? <PanelLeftClose size={17} /> : <PanelLeftOpen size={17} />}
+        </button>
       </header>
 
       {/* Title & Tools Row */}
-      <div className="flex items-center justify-between w-full max-w-[1024px] mx-auto px-4 py-4 bg-white dark:bg-gray-900 shrink-0">
-        <div className="flex flex-col justify-center gap-0.5 min-w-0">
+      <div className="flex items-center justify-between w-full px-3 sm:px-4 py-3 bg-white dark:bg-gray-900 shrink-0 border-b border-gray-100 dark:border-gray-800/60 gap-2">
+        <div className="flex flex-col justify-center gap-0.5 min-w-0 flex-1">
           {/* Breadcrumb */}
           <nav className="flex items-center gap-1 text-[12px]" aria-label="Breadcrumb">
             <Link
@@ -144,38 +144,41 @@ export default function ProjectTasksPage() {
           </nav>
 
           {/* Page title row */}
-          <div className="flex items-center gap-2">
-            <h1 className="text-xl font-bold text-gray-900 dark:text-gray-100 truncate">
+          <div className="flex items-center gap-2 min-w-0">
+            <h1 className="text-base sm:text-lg font-bold text-gray-900 dark:text-gray-100 truncate">
               {projectName || 'Project Tasks'}
             </h1>
             {hasActiveFilters && (
-              <span className="text-[12px] text-gray-400 dark:text-gray-500">
+              <span className="text-[11px] text-gray-400 dark:text-gray-500 whitespace-nowrap">
                 {totalResults} results
               </span>
             )}
           </div>
         </div>
 
-        <div className="flex items-center gap-2 shrink-0 ml-4">
+        <div className="flex items-center gap-1 sm:gap-1.5 shrink-0">
           {searchOpen ? (
-            <div className="flex items-center gap-2 px-3 py-1.5 w-[280px] border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800">
-              <Search size={14} className="text-gray-400 shrink-0" />
+            <div className="flex items-center gap-2 px-2.5 py-1.5 w-[160px] sm:w-[220px] border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800">
+              <Search size={13} className="text-gray-400 shrink-0" />
               <input
                 ref={searchRef}
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 onKeyDown={(e) => e.key === 'Escape' && closeSearch()}
                 onBlur={closeSearch}
-                placeholder="Search tasks..."
-                className="flex-1 text-[13px] text-gray-800 dark:text-gray-200 placeholder-gray-400 outline-none bg-transparent"
+                placeholder="Search tasks…"
+                className="flex-1 text-[13px] text-gray-800 dark:text-gray-200 placeholder-gray-400 outline-none bg-transparent min-w-0"
               />
             </div>
           ) : (
             <button
               onClick={openSearch}
-              className="p-1.5 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors rounded-md hover:bg-gray-50 dark:hover:bg-gray-800"
+              className="min-w-[40px] min-h-[40px] flex items-center justify-center text-gray-400
+                         hover:text-gray-600 dark:hover:text-gray-300 transition-colors rounded-md
+                         hover:bg-gray-50 dark:hover:bg-gray-800"
+              aria-label="Search"
             >
-              <Search size={16} />
+              <Search size={15} />
             </button>
           )}
           <FieldsDropdown
@@ -186,24 +189,33 @@ export default function ProjectTasksPage() {
             filters={filters}
             onFiltersChange={setFilters}
           />
-          <button className="p-1.5 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors rounded-lg border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800">
-            <Filter size={15} />
+          <button
+            className="min-w-[40px] min-h-[40px] flex items-center justify-center text-gray-400
+                       hover:text-gray-600 dark:hover:text-gray-300 transition-colors rounded-lg
+                       border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800"
+            aria-label="Filter"
+          >
+            <Filter size={14} />
           </button>
           <button
             onClick={() => createTask('New Task', 'To Do')}
-            className="flex items-center gap-1.5 px-3 py-1.5 text-[13px] text-white font-medium rounded-lg hover:opacity-90 transition-opacity"
+            className="flex items-center gap-1 sm:gap-1.5 px-2 sm:px-3 py-1.5 text-[13px] text-white
+                       font-semibold rounded-lg hover:opacity-90 transition-opacity min-h-[40px] whitespace-nowrap"
             style={{ backgroundColor: 'var(--accent-color)' }}
           >
             <Plus size={14} />
-            Add Task
+            <span>Add Task</span>
           </button>
         </div>
       </div>
 
       {/* Board / List */}
       {view === 'Board' ? (
-        <div className="flex-1 overflow-x-auto overflow-y-auto bg-gray-50 dark:bg-gray-950">
-          <div className="flex gap-6 p-6 min-h-full items-start">
+        <div className="flex-1 overflow-x-auto overflow-y-hidden bg-gray-50 dark:bg-gray-950">
+          <div
+            className="flex gap-3 h-full items-start"
+            style={{ minWidth: 'max-content', padding: '12px 16px' }}
+          >
             {STATUSES.filter((s) => !hasActiveFilters || filteredByColumn[s].length > 0).map((status) => (
               <KanbanCol
                 key={status}
