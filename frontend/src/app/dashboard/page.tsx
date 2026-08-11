@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 import {
-  PanelLeftClose, PanelLeftOpen,
+  PanelLeft,
   Search, Filter, Plus,
 } from 'lucide-react';
 import KanbanCol from '@/components/KanbanCol';
@@ -14,6 +14,7 @@ import { EMPTY_FILTERS } from '@/components/FieldsDropdown';
 import type { TaskFilters } from '@/components/FieldsDropdown';
 
 import { useSidebar } from '@/context/sidebar-context';
+import { useTheme } from '@/context/theme-context';
 
 export type FieldVisibility = {
   priority: boolean;
@@ -53,6 +54,10 @@ function matchesFilters(task: Task, filters: TaskFilters): boolean {
 
 export default function DashboardPage() {
   const { sidebarOpen, setSidebarOpen } = useSidebar();
+  const { theme } = useTheme();
+  const bg = theme === 'dark' ? '#111111' : '#ffffff';
+  const tc = theme === 'dark' ? '#e5e5e5' : '#171717';
+  const borderC = theme === 'dark' ? 'rgba(55,55,55,1)' : 'rgba(229,229,229,1)';
   const [view, setView]               = useState<'Board' | 'List'>('Board');
   const [searchOpen, setSearchOpen]   = useState(false);
   const [query, setQuery]             = useState('');
@@ -99,23 +104,23 @@ export default function DashboardPage() {
   return (
     <div className="flex flex-col flex-1 min-w-0 overflow-hidden">
       {/* ── Top header bar ── */}
-      <header className="flex items-center w-full px-3 sm:px-4 h-14 border-b border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 shrink-0">
+      <header className="flex items-center w-full px-3 sm:px-4 h-14 border-b border-gray-200 dark:border-gray-800 shrink-0" style={{ background: bg }}>
         <button
           onClick={() => setSidebarOpen((v) => !v)}
-          className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors
-                     min-w-[40px] min-h-[40px] flex items-center justify-center rounded-md
-                     hover:bg-gray-50 dark:hover:bg-gray-800"
+          className="flex items-center justify-center gap-2 rounded-md text-gray-900 dark:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+          style={{ width: '44px', height: '28px' }}
           aria-label="Toggle sidebar"
         >
-          {sidebarOpen ? <PanelLeftClose size={17} /> : <PanelLeftOpen size={17} />}
+          <PanelLeft size={15} />
         </button>
+        <div className="w-px h-[15px] shrink-0" style={{ background: borderC }} />
       </header>
 
       {/* ── Title & Tools Row ── */}
-      <div className="flex items-center justify-between w-full px-3 sm:px-4 py-3 gap-2 bg-white dark:bg-gray-900 shrink-0 border-b border-gray-100 dark:border-gray-800/60 flex-wrap">
+      <div className="flex items-center justify-between w-full min-h-[32px] px-3 sm:px-4 gap-2 shrink-0 mt-3" style={{ background: bg }}>
         {/* Left: title + result count */}
         <div className="flex items-center gap-2 min-w-0 shrink-0">
-          <h1 className="text-base sm:text-lg font-bold text-gray-900 dark:text-gray-100 truncate">Tasks</h1>
+          <h1 className="text-base font-semibold leading-none tracking-normal" style={{ color: tc }}>Tasks</h1>
           {hasActiveFilters && (
             <span className="text-[11px] text-gray-400 dark:text-gray-500 whitespace-nowrap">
               {Object.values(filteredByColumn).flat().length} results
@@ -124,7 +129,7 @@ export default function DashboardPage() {
         </div>
 
         {/* Right: tools */}
-        <div className="flex items-center gap-1 sm:gap-1.5 shrink-0">
+        <div className="flex items-center gap-2 w-[262px] h-8 shrink-0">
           {/* Search */}
           {searchOpen ? (
             <div className="flex items-center gap-2 px-2.5 py-1.5 w-[160px] sm:w-[240px] border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800">
@@ -142,12 +147,11 @@ export default function DashboardPage() {
           ) : (
             <button
               onClick={openSearch}
-              className="min-w-[40px] min-h-[40px] flex items-center justify-center text-gray-400
-                         hover:text-gray-600 dark:hover:text-gray-300 transition-colors rounded-md
-                         hover:bg-gray-50 dark:hover:bg-gray-800"
+              className="w-8 h-8 flex items-center justify-center rounded gap-1.5 border transition-colors"
+              style={{ padding: '8px 12px', borderColor: borderC, borderRadius: '4px' }}
               aria-label="Search"
             >
-              <Search size={15} />
+              <Search size={14} style={{ color: tc }} className="shrink-0" />
             </button>
           )}
 
@@ -163,32 +167,30 @@ export default function DashboardPage() {
 
           {/* Filter button */}
           <button
-            className="min-w-[40px] min-h-[40px] flex items-center justify-center text-gray-400
-                       hover:text-gray-600 dark:hover:text-gray-300 transition-colors rounded-lg
-                       border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800"
+            className="w-8 h-8 flex items-center justify-center transition-colors"
+            style={{ padding: '8px 12px', borderRadius: '4px', border: `1px solid ${borderC}` }}
             aria-label="Filter"
           >
-            <Filter size={14} />
+            <Filter size={14} style={{ color: tc }} />
           </button>
 
           {/* Add Task — always visible */}
           <button
             onClick={() => createTask('New Task', 'To Do')}
-            className="flex items-center gap-1 sm:gap-1.5 px-2 sm:px-3 py-1.5 text-[13px] text-white
-                       font-semibold rounded-lg hover:opacity-90 transition-opacity min-h-[40px] whitespace-nowrap"
-            style={{ backgroundColor: 'var(--accent-color)' }}
+            className="flex items-center justify-center gap-1 text-[13px] font-medium text-white rounded-md hover:opacity-90 transition-opacity w-[96px] h-8 shrink-0 bg-[rgba(23,23,23,1)]"
+            style={{ padding: '8px 12px' }}
           >
-            <Plus size={14} />
+            <Plus size={14} strokeWidth={2} />
             <span>Add Task</span>
           </button>
         </div>
       </div>
 
       {view === 'Board' ? (
-        <div className="flex-1 overflow-x-auto overflow-y-hidden bg-white dark:bg-gray-950">
+        <div className="flex-1 overflow-x-auto overflow-y-hidden mt-3" style={{ background: bg }}>
           <div
-            className="flex gap-3 h-full items-start"
-            style={{ minWidth: 'max-content', padding: '12px 16px' }}
+            className="flex h-full items-start"
+            style={{ minWidth: 'max-content', gap: '16px', padding: '12px 16px' }}
           >
             {STATUSES.filter((s) => !hasActiveFilters || filteredByColumn[s].length > 0).map((status) => (
               <KanbanCol

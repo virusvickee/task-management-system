@@ -17,6 +17,10 @@ function UserMenuDropdown({ user, onClose }: { user?: { name?: string; email?: s
   const ref = useRef<HTMLDivElement>(null);
   const [submenu, setSubmenu] = useState<'theme' | 'color' | null>(null);
   const { theme, setTheme, accentColor, setAccentColor } = useTheme();
+  const isDark = theme === 'dark';
+  const popoverBg = isDark ? '#1e1e1e' : '#ffffff';
+  const tc = isDark ? '#e5e5e5' : '#171717';
+  const borderC = isDark ? 'rgba(55,55,55,1)' : 'rgba(229,229,229,1)';
 
   useEffect(() => {
     const handler = (e: MouseEvent) => {
@@ -31,18 +35,15 @@ function UserMenuDropdown({ user, onClose }: { user?: { name?: string; email?: s
   return (
     <div
       ref={ref}
-      className="absolute left-2 top-[56px] z-[9999] w-[240px] min-w-[192px] rounded-md border border-gray-200 dark:border-gray-700 shadow-md py-2 select-none"
-      style={{
-        background: 'var(--base-popover, rgba(255, 255, 255, 1))',
-        borderTop: '1px solid var(--custom-foreground-5, rgba(10, 10, 10, 0.05))',
-      }}
+      className="absolute left-2 top-[56px] z-[9999] w-[240px] min-w-[192px] rounded-md shadow-md py-2 select-none"
+      style={{ background: popoverBg, border: `1px solid ${borderC}` }}
     >
       {/* User info */}
-      <div className="flex flex-col items-center px-4 pb-3 mb-1 border-b border-gray-100 dark:border-gray-800">
-        <div className="w-10 h-10 rounded-full shrink-0 overflow-hidden relative mt-1 mb-2 ring-1 ring-gray-200 dark:ring-gray-700">
+      <div className="flex flex-col items-center px-4 pb-3 mb-1" style={{ borderBottom: `1px solid ${borderC}` }}>
+        <div className="w-10 h-10 rounded-full shrink-0 overflow-hidden relative mt-1 mb-2">
           <img src="/avatar.png" alt="Dexter" className="w-full h-full object-cover" />
         </div>
-        <p className="text-[13px] font-bold text-gray-900 dark:text-gray-100">{user?.name || 'Dexter'}</p>
+        <p className="text-[13px] font-bold" style={{ color: tc }}>{user?.name || 'Dexter'}</p>
         <p className="text-[11px] text-gray-400 mt-0.5">{user?.email || 'dexter@gmail.com'}</p>
       </div>
 
@@ -51,33 +52,30 @@ function UserMenuDropdown({ user, onClose }: { user?: { name?: string; email?: s
         <div className="relative">
           <button
             onMouseEnter={() => setSubmenu('theme')}
-            className={`w-full flex items-center gap-2.5 px-2.5 py-2 rounded-lg text-[13px] text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors ${submenu === 'theme' ? 'bg-gray-50 dark:bg-gray-800' : ''}`}
+            className={`w-full flex items-center gap-2.5 px-2.5 py-2 rounded-lg text-[13px] transition-colors`}
+            style={{ color: tc, background: submenu === 'theme' ? (isDark ? '#2a2a2a' : '#f5f5f5') : 'transparent' }}
           >
-            <Sun size={14} className="text-gray-500 dark:text-gray-400 shrink-0" />
+            <Sun size={14} style={{ color: tc }} className="shrink-0" />
             <span className="flex-1 text-left">Change Theme</span>
-            <ChevronRight size={13} className="text-gray-400 shrink-0" />
+            <ChevronRight size={13} style={{ color: tc }} className="shrink-0" />
           </button>
           {submenu === 'theme' && (
             <div
-              className="absolute left-0 top-full mt-0.5 w-[192px] max-w-[calc(100vw-24px)] rounded-md border border-gray-200 dark:border-gray-700 py-1.5 z-[9999] select-none lg:left-full lg:top-0 lg:mt-0 lg:ml-1"
-              style={{
-                background: 'var(--base-popover, rgba(255, 255, 255, 1))',
-                borderTop: '1px solid var(--custom-foreground-5, rgba(10, 10, 10, 0.05))',
-                boxShadow:
-                  'var(--shadowmd2offset-x, 0px) var(--shadowmd2offset-y, 2px) var(--shadowmd2blur-radius, 4px) var(--shadowmd2spread-radius, -2px) var(--shadowmd2color, rgba(16, 24, 40, 0.06))',
-              }}
+              className="absolute left-0 top-full mt-0.5 w-[192px] max-w-[calc(100vw-24px)] rounded-md py-1.5 z-[9999] select-none lg:left-full lg:top-0 lg:mt-0 lg:ml-1"
+              style={{ background: popoverBg, border: `1px solid ${borderC}` }}
             >
               {(['light', 'dark'] as ThemeOption[]).map((t) => (
                 <button
                   key={t}
                   onClick={() => { setTheme(t); setSubmenu(null); }}
-                  className="w-full flex items-center gap-2.5 px-3 py-2 text-[13px] text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors rounded-lg"
+                  className="w-full flex items-center gap-2.5 px-3 py-2 text-[13px] transition-colors rounded-lg"
+                  style={{ color: tc }}
                 >
                   {t === 'light'
-                    ? <Sun size={13} className="text-gray-500 shrink-0" />
-                    : <Moon size={13} className="text-gray-500 shrink-0" />}
+                    ? <Sun size={13} style={{ color: tc }} className="shrink-0" />
+                    : <Moon size={13} style={{ color: tc }} className="shrink-0" />}
                   <span className="flex-1 text-left capitalize">{t}</span>
-                  {theme === t && <Check size={12} className="text-gray-900 dark:text-gray-100 shrink-0" />}
+                  {theme === t && <Check size={12} style={{ color: tc }} className="shrink-0" />}
                 </button>
               ))}
             </div>
@@ -88,50 +86,44 @@ function UserMenuDropdown({ user, onClose }: { user?: { name?: string; email?: s
         <div className="relative">
           <button
             onMouseEnter={() => setSubmenu('color')}
-            className={`w-full flex items-center gap-2.5 px-2.5 py-2 rounded-lg text-[13px] text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors ${submenu === 'color' ? 'bg-gray-50 dark:bg-gray-800' : ''}`}
+            className={`w-full flex items-center gap-2.5 px-2.5 py-2 rounded-lg text-[13px] transition-colors`}
+            style={{ color: tc, background: submenu === 'color' ? (isDark ? '#2a2a2a' : '#f5f5f5') : 'transparent' }}
           >
             <span className={`w-3.5 h-3.5 rounded-sm ${currentAccent.swatch} shrink-0`} />
             <span className="flex-1 text-left">Color Mode</span>
-            <ChevronRight size={13} className="text-gray-400 shrink-0" />
+            <ChevronRight size={13} style={{ color: tc }} className="shrink-0" />
           </button>
           {submenu === 'color' && (
             <div
-              className="absolute left-0 top-full mt-0.5 w-[192px] max-w-[calc(100vw-24px)] rounded-md border border-gray-200 dark:border-gray-700 py-1.5 z-[9999] select-none lg:left-full lg:top-0 lg:mt-0 lg:ml-1"
-              style={{
-                background: 'var(--base-popover, rgba(255, 255, 255, 1))',
-                borderTop: '1px solid var(--custom-foreground-5, rgba(10, 10, 10, 0.05))',
-                boxShadow:
-                  'var(--shadowmd2offset-x, 0px) var(--shadowmd2offset-y, 2px) var(--shadowmd2blur-radius, 4px) var(--shadowmd2spread-radius, -2px) var(--shadowmd2color, rgba(16, 24, 40, 0.06))',
-              }}
+              className="absolute left-0 top-full mt-0.5 w-[192px] max-w-[calc(100vw-24px)] rounded-md py-1.5 z-[9999] select-none lg:left-full lg:top-0 lg:mt-0 lg:ml-1"
+              style={{ background: popoverBg, border: `1px solid ${borderC}` }}
             >
               {ACCENT_COLORS.map((c) => (
                 <button
                   key={c.label}
                   onClick={() => { setAccentColor(c.label as AccentColor); setSubmenu(null); onClose(); }}
-                  className="w-full flex items-center gap-2.5 px-3 py-2 text-[13px] text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors rounded-lg"
+                  className="w-full flex items-center gap-2.5 px-3 py-2 text-[13px] transition-colors rounded-lg"
+                  style={{ color: tc }}
                 >
-                  {c.label === 'Black' ? (
-                    <span className="w-3.5 h-3.5 rounded-sm bg-gray-900 ring-1 ring-gray-300 dark:ring-gray-600 shrink-0" />
-                  ) : (
-                    <span className={`w-3.5 h-3.5 rounded-sm ${c.swatch} shrink-0`} />
-                  )}
+                  <span className={`w-3.5 h-3.5 rounded-sm ${c.swatch} shrink-0`} />
                   <span className="flex-1 text-left">{c.label}</span>
-                  {accentColor === c.label && <Check size={12} className="text-gray-900 dark:text-gray-100 shrink-0" />}
+                  {accentColor === c.label && <Check size={12} style={{ color: tc }} className="shrink-0" />}
                 </button>
               ))}
             </div>
           )}
         </div>
 
-        <div className="my-1 border-t border-gray-100 dark:border-gray-800" />
+        <div className="my-1" style={{ borderTop: `1px solid ${borderC}` }} />
 
         <Link
           href="/dashboard/settings"
           onMouseEnter={() => setSubmenu(null)}
           onClick={onClose}
-          className="flex items-center gap-2.5 px-2.5 py-2 rounded-lg text-[13px] text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+          className="flex items-center gap-2.5 px-2.5 py-2 rounded-lg text-[13px] transition-colors"
+          style={{ color: tc }}
         >
-          <Settings size={14} className="text-gray-500 dark:text-gray-400 shrink-0" />
+          <Settings size={14} style={{ color: tc }} className="shrink-0" />
           <span className="flex-1 text-left">Settings</span>
         </Link>
       </div>
@@ -141,6 +133,8 @@ function UserMenuDropdown({ user, onClose }: { user?: { name?: string; email?: s
 
 export default function Sidebar({ onClose }: { onClose?: () => void }) {
   const pathname = usePathname();
+  const { theme } = useTheme();
+  const tc = theme === 'dark' ? '#e5e5e5' : '#171717';
   const tasksActive    = pathname === '/dashboard' || pathname.startsWith('/dashboard/tasks');
   const projectsActive = pathname.startsWith('/dashboard/projects');
   const [menuOpen, setMenuOpen] = useState(false);
@@ -154,6 +148,10 @@ export default function Sidebar({ onClose }: { onClose?: () => void }) {
         .catch(() => {});
     }
   }, [menuOpen, pathname]);
+
+  function handleNavClick() {
+    if (window.innerWidth < 1024) onClose?.();
+  }
 
   return (
     <aside
@@ -182,10 +180,10 @@ export default function Sidebar({ onClose }: { onClose?: () => void }) {
         <div className="w-8 h-8 rounded-full shrink-0 overflow-hidden relative ring-1 ring-gray-200 dark:ring-gray-700">
           <img src="/avatar.png" alt="Avatar" className="w-full h-full object-cover" />
         </div>
-        <span className="text-[13px] font-semibold text-gray-900 dark:text-gray-100 flex-1 truncate">
+        <span className="text-[13px] font-semibold flex-1 truncate" style={{ color: tc }}>
           {user?.name || 'Dexter'}
         </span>
-        <ChevronsUpDown size={14} className="text-gray-400 dark:text-gray-500 shrink-0" />
+        <ChevronsUpDown size={14} style={{ color: tc }} className="shrink-0" />
       </button>
 
       {menuOpen && <UserMenuDropdown user={user} onClose={() => setMenuOpen(false)} />}
@@ -211,24 +209,22 @@ export default function Sidebar({ onClose }: { onClose?: () => void }) {
         <nav className="flex flex-col gap-0.5">
           <Link
             href="/dashboard"
-            onClick={onClose}
+            onClick={handleNavClick}
             className={`flex items-center gap-2 px-2 py-1.5 rounded-lg text-[13px] font-medium w-full transition-colors min-h-[40px] ${
-              tasksActive ? 'text-white' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 hover:text-gray-900'
+              tasksActive ? 'text-gray-900 dark:text-gray-100 bg-gray-100 dark:bg-gray-800' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 hover:text-gray-900'
             }`}
-            style={tasksActive ? { backgroundColor: 'var(--accent-color)' } : {}}
           >
-            <LayoutGrid size={14} className={tasksActive ? 'text-white shrink-0' : 'text-gray-500 dark:text-gray-400 shrink-0'} />
+            <LayoutGrid size={14} className="text-gray-500 dark:text-gray-400 shrink-0" />
             Tasks
           </Link>
           <Link
             href="/dashboard/projects"
-            onClick={onClose}
+            onClick={handleNavClick}
             className={`flex items-center gap-2 px-2 py-1.5 rounded-lg text-[13px] font-medium w-full transition-colors min-h-[40px] ${
-              projectsActive ? 'text-white' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 hover:text-gray-900'
+              projectsActive ? 'text-gray-900 dark:text-gray-100 bg-gray-100 dark:bg-gray-800' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 hover:text-gray-900'
             }`}
-            style={projectsActive ? { backgroundColor: 'var(--accent-color)' } : {}}
           >
-            <FolderOpen size={14} className={projectsActive ? 'text-white shrink-0' : 'text-gray-500 dark:text-gray-500 shrink-0'} />
+            <FolderOpen size={14} className="text-gray-500 dark:text-gray-500 shrink-0" />
             Projects
           </Link>
         </nav>

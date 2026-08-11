@@ -12,6 +12,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import AssignMemberPopover from './AssignMemberPopover';
+import { useTheme } from '@/context/theme-context';
 
 /* ── Avatar ── */
 function Avatar({ name }: { name: string }) {
@@ -51,6 +52,14 @@ function StatusSection({
   fields: Record<string, boolean>;
 }) {
   const router = useRouter();
+  const { theme } = useTheme();
+  const isDark = theme === 'dark';
+  const bg = isDark ? '#1a1a1a' : '#ffffff';
+  const tc = isDark ? '#e5e5e5' : '#171717';
+  const muted = isDark ? '#888' : '#6b7280';
+  const borderC = isDark ? 'rgba(55,55,55,1)' : 'rgba(229,229,229,1)';
+  const hoverBg = isDark ? '#222' : '#f9fafb';
+  const headBg = isDark ? '#1e1e1e' : '#f9fafb';
   const [collapsed, setCollapsed] = useState(false);
   const isCollapsed = searching ? false : collapsed;
   const [adding, setAdding] = useState(false);

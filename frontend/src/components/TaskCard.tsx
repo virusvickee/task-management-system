@@ -38,11 +38,20 @@ function initials(name: string) {
 export default function TaskCard({
   task,
   fields,
+  cardBg,
+  textColor,
+  borderColor,
 }: {
   task: Task;
   fields: Record<string, boolean>;
+  cardBg?: string;
+  textColor?: string;
+  borderColor?: string;
 }) {
   const router = useRouter();
+  const bg = cardBg ?? '#ffffff';
+  const tc = textColor ?? '#171717';
+  const bc = borderColor ?? 'rgba(229,229,229,1)';
 
   function handleDragStart(e: React.DragEvent) {
     e.dataTransfer.setData('taskId', task._id);
@@ -84,11 +93,22 @@ export default function TaskCard({
       draggable
       onDragStart={handleDragStart}
       onClick={() => router.push(`/dashboard/tasks/${task._id}`)}
-      className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 p-3 group hover:shadow-md hover:border-gray-300 dark:hover:border-gray-700 transition-all duration-150 cursor-pointer"
+      className="group hover:shadow-md transition-all duration-150 cursor-pointer"
+      style={{
+        width: '273px',
+        minHeight: '114px',
+        padding: '12px',
+        gap: '8px',
+        borderRadius: 'var(--border-radius-rounded-md, 6px)',
+        border: `1px solid ${bc}`,
+        background: bg,
+        display: 'flex',
+        flexDirection: 'column',
+      }}
     >
       {/* ── Title row ── */}
-      <div className="flex items-start justify-between gap-2 mb-[10px]">
-        <p className="text-[15px] font-semibold text-gray-900 dark:text-gray-100 leading-snug flex-1">
+      <div className="flex items-start justify-between gap-2 w-full">
+        <p className="text-[15px] font-semibold leading-snug flex-1" style={{ color: tc }}>
           {task.title}
         </p>
         {/* ── Actions dropdown — draggable=false so it never swallows the drag pointer ── */}
@@ -100,7 +120,7 @@ export default function TaskCard({
               onClick={(e) => e.stopPropagation()}
               className="opacity-0 group-hover:opacity-100 transition-opacity text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 outline-none shrink-0 mt-0.5 p-0.5 rounded hover:bg-gray-100 dark:hover:bg-gray-800"
             >
-              <MoreHorizontal size={15} />
+              <MoreHorizontal size={14} strokeWidth={2.5} />
             </button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
@@ -124,19 +144,19 @@ export default function TaskCard({
       </div>
 
       {/* ── Assignee + Due Date row ── */}
-      <div className="flex items-center justify-between mb-[10px]">
+      <div className="flex items-center justify-between mb-[10px]" style={{ width: '247px', height: '20px' }}>
         {fields.members ? (
-          <div className="flex items-center gap-[6px] w-[210px] h-[20px]">
+          <div className="flex items-center gap-[6px]" style={{ width: '210px', height: '20px' }}>
             <div
-              className={`w-5 h-5 rounded-full shrink-0 bg-gradient-to-br ${
+              className={`w-[14px] h-[14px] rounded-full shrink-0 bg-gradient-to-br ${
                 task.assignee ? avatarGradient(task.assignee) : 'from-gray-300 to-gray-400'
-              } flex items-center justify-center ring-2 ring-white dark:ring-gray-900`}
+              } flex items-center justify-center ring-1 ring-white dark:ring-gray-900`}
             >
-              <span className="text-[8px] font-bold text-white leading-none">
+              <span className="text-[6px] font-bold text-white leading-none">
                 {task.assignee ? initials(task.assignee) : '?'}
               </span>
             </div>
-            <span className="text-[13px] font-medium text-gray-600 dark:text-gray-300 truncate">
+            <span className="text-sm font-medium leading-snug tracking-normal truncate" style={{ color: tc }}>
               {task.assignee ?? 'Unassigned'}
             </span>
           </div>
@@ -151,13 +171,14 @@ export default function TaskCard({
 
       {/* ── Tags row ── */}
       {fields.labels && task.tags.length > 0 && (
-        <div className="flex flex-wrap gap-[6px]">
+        <div className="flex flex-wrap gap-[6px]" style={{ width: '247px', height: '20px' }}>
           {task.tags.map((tag) => (
             <span
               key={tag}
-              className="flex items-center gap-1 bg-gray-50 dark:bg-gray-800/80 border border-gray-200 dark:border-gray-700 text-gray-500 dark:text-gray-400 text-[12px] font-medium px-2 py-1 rounded-lg hover:border-gray-300 dark:hover:border-gray-600 transition-colors"
+              className="flex items-center gap-1 text-[12px] font-medium px-2 py-1 rounded-lg transition-colors"
+              style={{ background: cardBg, border: `1px solid ${bc}`, color: tc }}
             >
-              <Tag size={11} className="shrink-0 text-gray-400 dark:text-gray-500" />
+              <Tag size={11} className="shrink-0" strokeWidth={2.5} style={{ color: tc }} />
               {tag}
             </span>
           ))}
