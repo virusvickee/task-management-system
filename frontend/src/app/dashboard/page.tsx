@@ -64,7 +64,7 @@ export default function DashboardPage() {
   const [filters, setFilters]         = useState<TaskFilters>(EMPTY_FILTERS);
   const [fields, setFields]           = useState<FieldVisibility>({
     priority: true, members: true, dueDate: true,
-    labels: true, status: true, reporter: true,
+    labels: false, status: false, reporter: false,
   });
   const searchRef = useRef<HTMLInputElement>(null);
   const { tasksByColumn, createTask, updateTask } = useTasks();
@@ -107,8 +107,8 @@ export default function DashboardPage() {
       <header className="flex items-center w-full px-3 sm:px-4 h-14 border-b border-gray-200 dark:border-gray-800 shrink-0" style={{ background: bg }}>
         <button
           onClick={() => setSidebarOpen((v) => !v)}
-          className="flex items-center justify-center gap-2 rounded-md text-gray-900 dark:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
-          style={{ width: '44px', height: '28px' }}
+          className="flex items-center justify-center gap-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+          style={{ width: '44px', height: '28px', color: tc }}
           aria-label="Toggle sidebar"
         >
           <PanelLeft size={15} />
@@ -129,7 +129,7 @@ export default function DashboardPage() {
         </div>
 
         {/* Right: tools */}
-        <div className="flex items-center gap-2 w-[262px] h-8 shrink-0">
+        <div className="flex items-center gap-1.5 sm:gap-2 h-8 shrink-0">
           {/* Search */}
           {searchOpen ? (
             <div className="flex items-center gap-2 px-2.5 py-1.5 w-[160px] sm:w-[240px] border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800">
@@ -187,9 +187,9 @@ export default function DashboardPage() {
       </div>
 
       {view === 'Board' ? (
-        <div className="flex-1 overflow-x-auto overflow-y-hidden mt-3" style={{ background: bg }}>
+        <div className="flex-1 overflow-x-auto overflow-y-auto scrollbar-none mt-3" style={{ background: bg }}>
           <div
-            className="flex h-full items-start"
+            className="flex items-start"
             style={{ minWidth: 'max-content', gap: '16px', padding: '12px 16px' }}
           >
             {STATUSES.filter((s) => !hasActiveFilters || filteredByColumn[s].length > 0).map((status) => (

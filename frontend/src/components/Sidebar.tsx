@@ -211,7 +211,7 @@ export default function Sidebar({ onClose }: { onClose?: () => void }) {
             href="/dashboard"
             onClick={handleNavClick}
             className={`flex items-center gap-2 px-2 py-1.5 rounded-lg text-[13px] font-medium w-full transition-colors min-h-[40px] ${
-              tasksActive ? 'text-gray-900 dark:text-gray-100 bg-gray-100 dark:bg-gray-800' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 hover:text-gray-900'
+              tasksActive ? 'text-gray-900 dark:text-gray-100 bg-gray-100 dark:bg-gray-800' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-gray-100'
             }`}
           >
             <LayoutGrid size={14} className="text-gray-500 dark:text-gray-400 shrink-0" />
@@ -221,7 +221,7 @@ export default function Sidebar({ onClose }: { onClose?: () => void }) {
             href="/dashboard/projects"
             onClick={handleNavClick}
             className={`flex items-center gap-2 px-2 py-1.5 rounded-lg text-[13px] font-medium w-full transition-colors min-h-[40px] ${
-              projectsActive ? 'text-gray-900 dark:text-gray-100 bg-gray-100 dark:bg-gray-800' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 hover:text-gray-900'
+              projectsActive ? 'text-gray-900 dark:text-gray-100 bg-gray-100 dark:bg-gray-800' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-gray-100'
             }`}
           >
             <FolderOpen size={14} className="text-gray-500 dark:text-gray-500 shrink-0" />

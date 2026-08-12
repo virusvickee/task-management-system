@@ -105,93 +105,95 @@ function StatusSection({
   }
 
   return (
-
-    <div className="mb-4 rounded-xl border border-gray-200 dark:border-gray-800 overflow-hidden">
-      {/* Section header */}
+    <div style={{ width: '100%' }}>
+      {/* Section header — outside the table card */}
       <button
         onClick={() => setCollapsed((v) => !v)}
-        className="w-full flex items-center gap-2 px-4 py-3 bg-white dark:bg-gray-900 hover:bg-gray-50 dark:hover:bg-gray-800/80 transition-colors text-left"
+        className="flex items-center gap-2 px-1 py-2 mb-2 transition-colors text-left"
       >
         {isCollapsed
-          ? <ChevronRight size={14} className="text-gray-400 shrink-0" />
-          : <ChevronDown size={14} className="text-gray-400 shrink-0" />}
-        <span className="text-sm font-medium text-gray-800 dark:text-gray-200">{status}</span>
-        <span className="text-[11px] text-gray-400 dark:text-gray-400 font-medium bg-gray-100 dark:bg-gray-800 rounded-full px-1.5 py-0.5 leading-none ml-1">
-          {tasks.length}
-        </span>
+          ? <ChevronRight size={14} className="shrink-0" style={{ color: muted }} />
+          : <ChevronDown size={14} className="shrink-0" style={{ color: muted }} />}
+        <span className="text-sm font-medium" style={{ color: tc }}>{status}</span>
       </button>
 
       {!isCollapsed && (
-        <>
-          {/* Horizontally scrollable table — prevents page-level overflow on mobile */}
-          <div className="w-full overflow-x-auto overscroll-x-contain">
-            <table className="w-full border-collapse" style={{ minWidth: '560px' }}>
+        <div style={{ border: `1px solid ${borderC}`, background: bg, borderRadius: '6px', overflow: 'hidden', width: '100%' }}>
+          <div className="overflow-x-auto overscroll-x-contain scrollbar-none">
+            <table className="border-collapse" style={{ width: '100%' }}>
+              <colgroup>
+                <col />
+                {fields.priority && <col style={{ width: '110px' }} />}
+                {fields.members && <col style={{ width: '100px' }} />}
+                {fields.dueDate && <col style={{ width: '130px' }} />}
+                {fields.labels && <col style={{ width: '110px' }} />}
+                {fields.status && <col style={{ width: '110px' }} />}
+                {fields.reporter && <col style={{ width: '90px' }} />}
+                <col style={{ width: '0' }} />
+                <col style={{ width: '60px' }} />
+              </colgroup>
               <thead>
-                <tr className="bg-gray-50 dark:bg-gray-800/60 border-y border-gray-100 dark:border-gray-800">
-                  <th className="text-left px-4 py-2 text-[12px] font-medium text-gray-500 dark:text-gray-400 min-w-[160px]">Task</th>
-                  {fields.priority && <th className="text-left px-4 py-2 text-[12px] font-medium text-gray-500 dark:text-gray-400 whitespace-nowrap">Priority</th>}
-                  {fields.members && <th className="text-left px-4 py-2 text-[12px] font-medium text-gray-500 dark:text-gray-400 whitespace-nowrap">Members</th>}
-                  {fields.dueDate && <th className="text-left px-4 py-2 text-[12px] font-medium text-gray-500 dark:text-gray-400 whitespace-nowrap">Due Date</th>}
-                  {fields.labels && <th className="text-left px-4 py-2 text-[12px] font-medium text-gray-500 dark:text-gray-400 whitespace-nowrap">Labels</th>}
-                  {fields.status && <th className="text-left px-4 py-2 text-[12px] font-medium text-gray-500 dark:text-gray-400 whitespace-nowrap">Status</th>}
-                  {fields.reporter && <th className="text-left px-4 py-2 text-[12px] font-medium text-gray-500 dark:text-gray-400 whitespace-nowrap">Reporter</th>}
-                  <th className="px-4 py-2 w-10" />
+                <tr style={{ background: headBg }}>
+                  <th className="text-left text-[12px] font-medium" style={{ color: muted, height: '48px', padding: '0 12px', borderBottom: `1px solid ${borderC}` }}>Task</th>
+                  {fields.priority && <th className="text-left text-[12px] font-medium" style={{ color: muted, height: '48px', padding: '0 12px', borderBottom: `1px solid ${borderC}` }}>Priority</th>}
+                  {fields.members && <th className="text-left text-[12px] font-medium" style={{ color: muted, height: '48px', padding: '0 12px', borderBottom: `1px solid ${borderC}` }}>Members</th>}
+                  {fields.dueDate && <th className="text-left text-[12px] font-medium" style={{ color: muted, height: '48px', padding: '0 12px', borderBottom: `1px solid ${borderC}` }}>Due Date</th>}
+                  {fields.labels && <th className="text-left text-[12px] font-medium" style={{ color: muted, height: '48px', padding: '0 12px', borderBottom: `1px solid ${borderC}` }}>Labels</th>}
+                  {fields.status && <th className="text-left text-[12px] font-medium" style={{ color: muted, height: '48px', padding: '0 12px', borderBottom: `1px solid ${borderC}` }}>Status</th>}
+                  {fields.reporter && <th className="text-left text-[12px] font-medium" style={{ color: muted, height: '48px', padding: '0 12px', borderBottom: `1px solid ${borderC}` }}>Reporter</th>}
+                  <th style={{ borderBottom: `1px solid ${borderC}` }} />
+                  <th className="text-left text-[12px] font-medium" style={{ color: muted, height: '48px', padding: '0 12px', borderBottom: `1px solid ${borderC}` }}>Actions</th>
                 </tr>
               </thead>
               <tbody>
                 {tasks.map((task) => (
-                  <tr key={task._id} className="border-b border-gray-100 dark:border-gray-800/60 hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors h-12 cursor-pointer" onClick={() => router.push(`/dashboard/tasks/${task._id}`)}>
-                    <td className="px-4 py-2 text-sm text-gray-900 dark:text-gray-100 font-medium">{task.title}</td>
-                    {fields.priority && <td className="px-4 py-2"><Priority value={task.priority} /></td>}
+                  <tr key={task._id} className="transition-colors cursor-pointer" style={{ borderBottom: `1px solid ${borderC}` }} onMouseEnter={e => (e.currentTarget.style.background = hoverBg)} onMouseLeave={e => (e.currentTarget.style.background = 'transparent')} onClick={() => router.push(`/dashboard/tasks/${task._id}`)}>
+                    <td className="text-[13px] font-medium" style={{ color: tc, padding: '12px', height: '44px', borderBottom: `1px solid ${borderC}` }}>{task.title}</td>
+                    {fields.priority && <td style={{ padding: '12px', height: '44px', borderBottom: `1px solid ${borderC}` }}><Priority value={task.priority} /></td>}
                     {fields.members && (
-                      <td className="px-4 py-2" onClick={(e) => e.stopPropagation()}>
+                      <td style={{ padding: '12px', height: '44px', borderBottom: `1px solid ${borderC}` }} onClick={(e) => e.stopPropagation()}>
                         <AssignMemberPopover
                           taskId={task._id}
                           currentMembers={task.members || (task.assignee ? [task.assignee] : [])}
                           onMembersChange={() => window.location.reload()}
                           trigger={
                             task.assignee ? (
-                              <button className="outline-none min-w-[40px] min-h-[40px] flex items-center justify-center"><Avatar name={task.assignee} /></button>
+                              <button className="outline-none flex items-center justify-center"><Avatar name={task.assignee} /></button>
                             ) : (
-                              <button className="w-7 h-7 rounded-full border border-dashed border-gray-300 dark:border-gray-700 flex items-center justify-center text-gray-400 dark:text-gray-500 hover:border-gray-400 dark:hover:border-gray-500 hover:text-gray-500 dark:hover:text-gray-300 transition-colors outline-none"><Plus size={10} /></button>
+                              <button className="w-7 h-7 rounded-full border border-dashed flex items-center justify-center transition-colors outline-none" style={{ borderColor: borderC, color: muted }}><Plus size={10} /></button>
                             )
                           }
                         />
                       </td>
                     )}
                     {fields.dueDate && (
-                      <td className="px-4 py-2 text-[13px] text-gray-700 dark:text-gray-300 whitespace-nowrap">
+                      <td className="text-[13px] whitespace-nowrap" style={{ color: tc, padding: '12px', height: '44px', borderBottom: `1px solid ${borderC}` }}>
                         {task.dueDate
                           ? new Date(task.dueDate).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })
-                          : <span className="text-gray-300 dark:text-gray-600">—</span>}
+                          : <span style={{ color: muted }}>—</span>}
                       </td>
                     )}
                     {fields.labels && (
-                      <td className="px-4 py-2">
+                      <td style={{ padding: '12px', height: '44px', borderBottom: `1px solid ${borderC}` }}>
                         <div className="flex flex-wrap gap-1">
-                          {task.tags.map((t) => <span key={t} className="bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 text-[11px] font-medium px-2 py-0.5 rounded-full">{t}</span>)}
+                          {task.tags.map((t) => <span key={t} className="text-[11px] font-medium px-2 py-0.5 rounded-full" style={{ background: isDark ? '#2a2a2a' : '#f0f0f0', color: tc }}>{t}</span>)}
                         </div>
                       </td>
                     )}
-                    {fields.status && <td className="px-4 py-2 text-[13px] text-gray-700 dark:text-gray-300 whitespace-nowrap">{task.status}</td>}
-                    {fields.reporter && <td className="px-4 py-2 text-[13px] text-gray-500 dark:text-gray-400">You</td>}
-                    <td className="px-4 py-2 text-right">
+                    {fields.status && <td className="text-[13px]" style={{ color: tc, padding: '12px', height: '44px', borderBottom: `1px solid ${borderC}` }}>{task.status}</td>}
+                    {fields.reporter && <td className="text-[13px]" style={{ color: muted, padding: '12px', height: '44px', borderBottom: `1px solid ${borderC}` }}>You</td>}
+                    <td style={{ borderBottom: `1px solid ${borderC}` }} />
+                    <td style={{ padding: '12px', height: '44px', borderBottom: `1px solid ${borderC}` }}>
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
-                          <button className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors outline-none p-1.5 min-w-[36px] min-h-[36px] flex items-center justify-center" onClick={(e) => e.stopPropagation()}>
+                          <button className="transition-colors outline-none p-1.5 flex items-center justify-center rounded ml-auto" style={{ color: muted }} onClick={(e) => e.stopPropagation()}>
                             <MoreHorizontal size={15} />
                           </button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
-                          <DropdownMenuItem onClick={(e) => { e.stopPropagation(); router.push(`/dashboard/tasks/${task._id}`); }}>
-                            Edit
-                          </DropdownMenuItem>
-                          <DropdownMenuItem onClick={(e) => { e.stopPropagation(); handleDuplicate(task); }}>
-                            Duplicate
-                          </DropdownMenuItem>
-                          <DropdownMenuItem onClick={(e) => { e.stopPropagation(); handleDelete(task._id); }} className="text-red-600 dark:text-red-400 focus:text-red-600 dark:focus:text-red-400">
-                            Delete
-                          </DropdownMenuItem>
+                          <DropdownMenuItem onClick={(e) => { e.stopPropagation(); router.push(`/dashboard/tasks/${task._id}`); }}>Edit</DropdownMenuItem>
+                          <DropdownMenuItem onClick={(e) => { e.stopPropagation(); handleDuplicate(task); }}>Duplicate</DropdownMenuItem>
+                          <DropdownMenuItem onClick={(e) => { e.stopPropagation(); handleDelete(task._id); }} className="text-red-600 dark:text-red-400 focus:text-red-600 dark:focus:text-red-400">Delete</DropdownMenuItem>
                         </DropdownMenuContent>
                       </DropdownMenu>
                     </td>
@@ -200,9 +202,7 @@ function StatusSection({
               </tbody>
             </table>
           </div>
-
-          {/* Add task row */}
-          <div className="px-4 py-2 border-t border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900">
+          <div style={{ borderTop: `1px solid ${borderC}`, padding: '8px 12px' }}>
             {adding ? (
               <input
                 ref={inputRef}
@@ -210,20 +210,18 @@ function StatusSection({
                 onChange={(e) => setInputVal(e.target.value)}
                 onKeyDown={handleKey}
                 onBlur={commitAdd}
-                placeholder="Task title…"
-                className="w-full text-sm text-gray-800 dark:text-gray-200 bg-white dark:bg-gray-800 placeholder-gray-400 border border-gray-200 dark:border-gray-700 rounded-lg px-3 py-1.5 focus:ring-2 focus:ring-blue-200 dark:focus:ring-blue-900 outline-none"
+                placeholder="Task name…"
+                className="text-[13px] outline-none bg-transparent w-full"
+                style={{ color: tc }}
               />
             ) : (
-              <button
-                onClick={startAdding}
-                className="flex items-center gap-1.5 text-[12px] text-gray-400 dark:text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors py-1"
-              >
+              <button onClick={startAdding} className="flex items-center gap-1.5 text-[13px] transition-colors" style={{ color: muted }}>
                 <Plus size={13} />
                 Add Task
               </button>
             )}
           </div>
-        </>
+        </div>
       )}
     </div>
   );
@@ -244,10 +242,12 @@ export default function ListView({
   const STATUSES: Status[] = ['To Do', 'Doing', 'Completed', 'On Hold'];
   const searching = query.length > 0;
   return (
-    <div className="flex-1 overflow-y-auto overflow-x-hidden p-3 sm:p-6">
+    <div className="flex-1 overflow-y-auto p-3 sm:p-6 scrollbar-none" style={{ overflowX: 'hidden' }}>
+      <div className="flex flex-col" style={{ gap: '16px' }}> 
       {STATUSES.filter((s) => !searching || tasksByColumn[s].length > 0).map((s) => (
         <StatusSection key={s} status={s} tasks={tasksByColumn[s]} onAddTask={onAddTask} searching={searching} fields={fields} />
       ))}
+      </div>
     </div>
   );
 }
