@@ -4,7 +4,7 @@ import { useCallback, useEffect, useRef, useState, type CSSProperties } from 're
 import { useParams, useRouter } from 'next/navigation';
 import {
   AtSign, ArrowRight, Calendar, Check, ChevronDown, ChevronRight, Eye,
-  Lock, MoreHorizontal, PanelLeftClose, PanelLeftOpen,
+  Lock, MoreHorizontal, PanelLeft,
   PanelRight, Paperclip, Plus, Send, Settings, Share2, SmilePlus, Tag, UserPlus, X,
 } from 'lucide-react';
 import { useSidebar } from '@/context/sidebar-context';
@@ -567,15 +567,24 @@ export default function TaskDetailPage() {
   return (
     <div className="flex flex-col flex-1 min-w-0 overflow-hidden bg-[var(--background)]">
       {/* ── Header ── */}
-      <header className="flex items-center w-full h-14 px-3 sm:px-4 bg-[var(--base-background)] shrink-0 border-b border-[color:var(--base-border)]">
-        <button onClick={() => setSidebarOpen((value) => !value)} className="text-gray-400 dark:text-gray-500 shrink-0 w-9 h-9 flex items-center justify-center rounded-md hover:bg-gray-50 dark:hover:bg-gray-800" aria-label="Toggle sidebar">
-          {sidebarOpen ? <PanelLeftClose size={17} /> : <PanelLeftOpen size={17} />}
-        </button>
+      <header className="dashboard-top-header">
+        <div className="dashboard-top-header-inner">
+          <button
+            type="button"
+            onClick={() => setSidebarOpen((value) => !value)}
+            className="dashboard-sidebar-toggle-btn"
+            aria-label="Toggle sidebar"
+          >
+            <PanelLeft size={16} strokeWidth={1.75} />
+          </button>
+          <div className="dashboard-top-header-divider" aria-hidden="true" />
+        </div>
       </header>
 
       {/* ── Body ── */}
       <div className="flex flex-1 min-h-0 overflow-y-auto lg:overflow-hidden flex-col bg-[var(--background)] p-2 sm:p-2 gap-4 sm:gap-5">
         {/* Title + actions */}
+        <div className="dashboard-page-shell">
         <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-3 md:gap-4 px-2 sm:px-4 pt-3 sm:pt-4 min-w-0 shrink-0">
           <TaskHeaderSection
             title={task.title}
@@ -607,6 +616,7 @@ export default function TaskDetailPage() {
             </DropdownMenu>
             <button onClick={() => setRightPanel((v) => !v)} className={`w-8 h-8 flex items-center justify-center border rounded-lg transition-colors shrink-0 ${rightPanel ? 'bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-100 border-[color:var(--base-border)]' : 'text-gray-900 border-[color:var(--base-border)] hover:bg-gray-50 dark:text-gray-100 dark:hover:bg-gray-800'}`}><PanelRight size={14} strokeWidth={1.75} /></button>
           </div>
+        </div>
         </div>
 
         <div className="flex flex-col lg:flex-row flex-1 min-h-0 lg:overflow-hidden gap-4 lg:gap-5">

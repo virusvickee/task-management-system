@@ -53,18 +53,21 @@ export function useProjects() {
   }, []);
 
   const updateProject = useCallback(async (id: string, partialFields: Partial<Project>) => {
+    if (id.startsWith('tmp-')) return;
     setProjects((prev) => prev.map((p) => (p._id === id ? { ...p, ...partialFields } : p)));
     try {
-      await apiFetch(`/projects/${id}`, {
+      const updated = await apiFetch(`/projects/${id}`, {
         method: 'PATCH',
         body: JSON.stringify(partialFields),
       });
+      setProjects((prev) => prev.map((p) => (p._id === id ? updated : p)));
     } catch {
       apiFetch('/projects').then(setProjects).catch(console.error);
     }
   }, []);
 
   const deleteProject = useCallback(async (id: string) => {
+    if (id.startsWith('tmp-')) return;
     setProjects((prev) => prev.filter((p) => p._id !== id));
     try {
       await apiFetch(`/projects/${id}`, { method: 'DELETE' });

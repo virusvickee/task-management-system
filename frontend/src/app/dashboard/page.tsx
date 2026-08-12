@@ -4,18 +4,19 @@ import { useEffect, useRef, useState } from 'react';
 import { usePathname } from 'next/navigation';
 import {
   PanelLeft,
-  Search, Filter, Plus,
+  Plus,
 } from 'lucide-react';
 import KanbanCol from '@/components/KanbanCol';
 import FieldsDropdown from '@/components/FieldsDropdown';
+import FilterDropdown, { EMPTY_FILTERS } from '@/components/FilterDropdown';
+import type { TaskFilters } from '@/components/FilterDropdown';
 import ListView from '@/components/ListView';
+import ToolbarSearchInput, { type ToolbarSearchInputHandle } from '@/components/ToolbarSearchInput';
 import { useTasks, STATUSES } from '@/hooks/useTasks';
+import { useSearchShortcut } from '@/hooks/useSearchShortcut';
 import type { Status, Task } from '@/hooks/useTasks';
-import { EMPTY_FILTERS } from '@/components/FieldsDropdown';
-import type { TaskFilters } from '@/components/FieldsDropdown';
 
 import { useSidebar } from '@/context/sidebar-context';
-import { useTheme } from '@/context/theme-context';
 
 export type FieldVisibility = {
   priority: boolean;
@@ -56,19 +57,14 @@ function matchesFilters(task: Task, filters: TaskFilters): boolean {
 export default function DashboardPage() {
   const pathname = usePathname();
   const { sidebarOpen, setSidebarOpen } = useSidebar();
-  const { theme } = useTheme();
-  const bg = theme === 'dark' ? '#111111' : '#ffffff';
-  const tc = theme === 'dark' ? '#e5e5e5' : '#171717';
-  const borderC = theme === 'dark' ? 'rgba(55,55,55,1)' : 'rgba(229,229,229,1)';
-  const [view, setView]               = useState<'Board' | 'List'>('Board');
-  const [searchOpen, setSearchOpen]   = useState(false);
+  const [view, setView]               = useState<'Board' | 'List'>('List');
   const [query, setQuery]             = useState('');
   const [filters, setFilters]         = useState<TaskFilters>(EMPTY_FILTERS);
   const [fields, setFields]           = useState<FieldVisibility>({
     priority: true, members: true, dueDate: true,
     labels: false, status: false, reporter: false,
   });
-  const searchRef = useRef<HTMLInputElement>(null);
+  const searchRef = useRef<ToolbarSearchInputHandle>(null);
   const { tasksByColumn, createTask, updateTask, refetch } = useTasks();
 
   useEffect(() => {
@@ -77,20 +73,7 @@ export default function DashboardPage() {
 
   const handleDrop = (taskId: string, status: Status) => updateTask(taskId, { status });
 
-  useEffect(() => {
-    function onKeyDown(e: KeyboardEvent) {
-      if (e.key === 'f' && (e.metaKey || e.ctrlKey)) {
-        e.preventDefault();
-        setSearchOpen(true);
-        setTimeout(() => searchRef.current?.focus(), 0);
-      }
-    }
-    document.addEventListener('keydown', onKeyDown);
-    return () => document.removeEventListener('keydown', onKeyDown);
-  }, []);
-
-  function openSearch()  { setSearchOpen(true);  setTimeout(() => searchRef.current?.focus(), 0); }
-  function closeSearch() { setSearchOpen(false);  setQuery(''); }
+  useSearchShortcut(() => searchRef.current?.open());
 
   const q = query.toLowerCase();
 
@@ -108,58 +91,42 @@ export default function DashboardPage() {
   const hasActiveFilters = q || Object.values(filters).some((v) => Array.isArray(v) ? v.length > 0 : v !== null);
 
   return (
-    <div className="flex flex-col flex-1 min-w-0 overflow-hidden">
-      {/* ── Top header bar ── */}
-      <header className="flex items-center w-full px-3 sm:px-4 h-14 border-b border-gray-200 dark:border-gray-800 shrink-0" style={{ background: bg }}>
-        <button
-          onClick={() => setSidebarOpen((v) => !v)}
-          className="flex items-center justify-center gap-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
-          style={{ width: '44px', height: '28px', color: tc }}
-          aria-label="Toggle sidebar"
-        >
-          <PanelLeft size={15} />
-        </button>
-        <div className="w-px h-[15px] shrink-0" style={{ background: borderC }} />
+    <div className="dashboard-page-root flex flex-col flex-1 min-w-0 overflow-hidden">
+      <header className="dashboard-top-header">
+        <div className="dashboard-top-header-inner">
+          <button
+            type="button"
+            onClick={() => setSidebarOpen((v) => !v)}
+            className="dashboard-sidebar-toggle-btn"
+            aria-label="Toggle sidebar"
+          >
+            <PanelLeft size={16} strokeWidth={1.75} />
+          </button>
+          <div className="dashboard-top-header-divider" aria-hidden="true" />
+        </div>
       </header>
 
       {/* ── Title & Tools Row ── */}
-      <div className="flex items-center justify-between w-full min-h-[32px] px-3 sm:px-4 gap-2 shrink-0 mt-3" style={{ background: bg }}>
-        {/* Left: title + result count */}
-        <div className="flex items-center gap-2 min-w-0 shrink-0">
-          <h1 className="text-base font-semibold leading-none tracking-normal" style={{ color: tc }}>Tasks</h1>
-          {hasActiveFilters && (
-            <span className="text-[11px] text-gray-400 dark:text-gray-500 whitespace-nowrap">
-              {Object.values(filteredByColumn).flat().length} results
-            </span>
-          )}
-        </div>
+      <div className="dashboard-page-shell shrink-0">
+        <div className="dashboard-page-toolbar">
+          <div className="flex items-center gap-2 min-w-0 shrink-0">
+            <h1 className="dashboard-page-title truncate">Tasks</h1>
+            {hasActiveFilters && (
+              <span className="dashboard-page-meta">
+                {Object.values(filteredByColumn).flat().length} results
+              </span>
+            )}
+          </div>
 
-        {/* Right: tools */}
-        <div className="flex items-center gap-1.5 sm:gap-2 h-8 shrink-0">
-          {/* Search */}
-          {searchOpen ? (
-            <div className="flex items-center gap-2 px-2.5 py-1.5 w-[160px] sm:w-[240px] border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800">
-              <Search size={13} className="text-gray-400 shrink-0" />
-              <input
-                ref={searchRef}
-                value={query}
-                onChange={(e) => setQuery(e.target.value)}
-                onKeyDown={(e) => e.key === 'Escape' && closeSearch()}
-                onBlur={closeSearch}
-                placeholder="Search tasks…"
-                className="flex-1 text-[13px] text-gray-800 dark:text-gray-200 placeholder-gray-400 outline-none bg-transparent min-w-0"
-              />
-            </div>
-          ) : (
-            <button
-              onClick={openSearch}
-              className="w-8 h-8 flex items-center justify-center rounded gap-1.5 border transition-colors"
-              style={{ padding: '8px 12px', borderColor: borderC, borderRadius: '4px' }}
-              aria-label="Search"
-            >
-              <Search size={14} style={{ color: tc }} className="shrink-0" />
-            </button>
-          )}
+          {/* Right: tools */}
+          <div className="dashboard-page-toolbar-actions">
+          <ToolbarSearchInput
+            ref={searchRef}
+            value={query}
+            onChange={setQuery}
+            placeholder="Design Homepage"
+            aria-label="Search tasks"
+          />
 
           {/* Fields dropdown */}
           <FieldsDropdown
@@ -167,37 +134,25 @@ export default function DashboardPage() {
             onViewChange={setView}
             fields={fields}
             onFieldsChange={(f) => setFields(f as FieldVisibility)}
-            filters={filters}
-            onFiltersChange={setFilters}
           />
 
-          {/* Filter button */}
-          <button
-            className="w-8 h-8 flex items-center justify-center transition-colors"
-            style={{ padding: '8px 12px', borderRadius: '4px', border: `1px solid ${borderC}` }}
-            aria-label="Filter"
-          >
-            <Filter size={14} style={{ color: tc }} />
-          </button>
+          <FilterDropdown filters={filters} onFiltersChange={setFilters} />
 
-          {/* Add Task — always visible */}
           <button
+            type="button"
             onClick={() => createTask('New Task', 'To Do')}
-            className="flex items-center justify-center gap-1 text-[13px] font-medium text-white rounded-md hover:opacity-90 transition-opacity w-[96px] h-8 shrink-0 bg-[rgba(23,23,23,1)]"
-            style={{ padding: '8px 12px' }}
+            className="dashboard-toolbar-add-task-btn"
           >
-            <Plus size={14} strokeWidth={2} />
-            <span>Add Task</span>
+            <Plus size={14} strokeWidth={2} className="dashboard-toolbar-icon shrink-0" />
+            <span className="dashboard-toolbar-add-task-label">Add Task</span>
           </button>
+          </div>
         </div>
       </div>
 
       {view === 'Board' ? (
-        <div className="flex-1 overflow-x-auto overflow-y-auto scrollbar-none mt-3" style={{ background: bg }}>
-          <div
-            className="flex items-start"
-            style={{ minWidth: 'max-content', gap: '16px', padding: '12px 16px' }}
-          >
+        <div className="flex-1 overflow-x-auto overflow-y-auto scrollbar-none dashboard-kanban-area">
+          <div className="flex items-start dashboard-kanban-inner">
             {STATUSES.filter((s) => !hasActiveFilters || filteredByColumn[s].length > 0).map((status) => (
               <KanbanCol
                 key={status}

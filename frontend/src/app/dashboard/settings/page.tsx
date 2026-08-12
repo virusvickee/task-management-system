@@ -2,11 +2,10 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
 import { ArrowLeft, Search, User, Sun, Square, Pencil, Check, Moon } from 'lucide-react';
-import { useTheme, ACCENT_COLORS } from '@/context/theme-context';
+import { useTheme, ACCENT_COLORS, DEFAULT_ACCENT, DEFAULT_THEME } from '@/context/theme-context';
 import type { AccentColor } from '@/context/theme-context';
-import { apiFetch, guestLogin } from '@/lib/api';
+import { apiFetch, guestLogin, logout } from '@/lib/api';
 
 type Section = 'profile' | 'theme' | 'color';
 
@@ -24,7 +23,6 @@ interface UserProfile {
 }
 
 function ProfileSection() {
-  const router = useRouter();
   const [profile, setProfile] = useState<UserProfile>({
     name: 'Dexter',
     email: 'dexter@gmail.com',
@@ -73,8 +71,7 @@ function ProfileSection() {
 
   const handleLeaveWorkspace = () => {
     if (confirm('Are you sure you want to leave? This will end your guest session.')) {
-      localStorage.removeItem('tms-token');
-      router.push('/login');
+      logout();
     }
   };
 
@@ -178,46 +175,78 @@ function ProfileSection() {
 }
 
 function ThemeSection() {
-  const { theme, setTheme } = useTheme();
+  const { theme, setTheme, accentColor, resetToDefaults } = useTheme();
+  const isDefault = theme === DEFAULT_THEME && accentColor === DEFAULT_ACCENT;
+
   return (
     <div className="w-full">
-      <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-6">Theme</h1>
-      <div className="border border-gray-200 dark:border-gray-700 rounded-xl bg-white dark:bg-gray-900 divide-y divide-gray-100 dark:divide-gray-800">
+      <h1 className="settings-section-title">Theme</h1>
+      <p className="settings-section-desc mb-4">
+        Default is <strong>Light</strong> with the normal Figma look. Switch to Dark for the whole app, or restore defaults below.
+      </p>
+      <div className="settings-option-list mb-4">
         {(['light', 'dark'] as const).map((t) => (
           <button
             key={t}
+            type="button"
             onClick={() => setTheme(t)}
-            className="w-full flex items-center gap-3 px-5 py-4 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+            className={`settings-option-btn${theme === t ? ' settings-option-btn--active' : ''}`}
+            aria-pressed={theme === t}
           >
-            {t === 'light'
-              ? <Sun size={15} className="text-gray-500 shrink-0" />
-              : <Moon size={15} className="text-gray-500 shrink-0" />}
-            <span className="flex-1 text-left text-[13px] text-gray-700 dark:text-gray-300 capitalize">{t}</span>
-            {theme === t && <Check size={14} className="text-gray-900 dark:text-gray-100 shrink-0" />}
+            <span className="settings-theme-preview" data-theme-preview={t} aria-hidden="true">
+              <span className="settings-theme-preview-bar" />
+              <span className="settings-theme-preview-line" />
+              <span className="settings-theme-preview-line settings-theme-preview-line--short" />
+            </span>
+            <span className="settings-option-icon">
+              {t === 'light' ? <Sun size={15} /> : <Moon size={15} />}
+            </span>
+            <span className="settings-option-label capitalize">
+              {t}{t === 'light' ? ' (Default)' : ''}
+            </span>
+            {theme === t && <Check size={14} className="settings-option-check shrink-0" />}
           </button>
         ))}
       </div>
+      {!isDefault && (
+        <button
+          type="button"
+          onClick={resetToDefaults}
+          className="settings-restore-defaults-btn"
+        >
+          Restore default (Light + Black)
+        </button>
+      )}
     </div>
   );
 }
 
 function ColorSection() {
   const { accentColor, setAccentColor } = useTheme();
+
   return (
     <div className="w-full">
-      <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-6">Color</h1>
-      <div className="border border-gray-200 dark:border-gray-700 rounded-xl bg-white dark:bg-gray-900 divide-y divide-gray-100 dark:divide-gray-800">
+      <h1 className="settings-section-title">Color</h1>
+      <p className="settings-section-desc mb-4">
+        Default is <strong>Black</strong> — normal dark Add Task button. Other colors are optional accents only.
+      </p>
+      <div className="settings-option-list">
         {ACCENT_COLORS.map((c) => (
           <button
             key={c.label}
+            type="button"
             onClick={() => setAccentColor(c.label as AccentColor)}
-            className="w-full flex items-center gap-3 px-5 py-4 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+            className={`settings-option-btn${accentColor === c.label ? ' settings-option-btn--active' : ''}`}
+            aria-pressed={accentColor === c.label}
           >
             <span
-              className={`w-4 h-4 rounded-sm shrink-0 ${c.label === 'Black' ? 'bg-gray-900 ring-1 ring-gray-300 dark:ring-gray-600' : c.swatch}`}
+              className={`settings-color-swatch ${c.label === 'Black' ? 'settings-color-swatch--black' : c.swatch}`}
+              style={c.label !== 'Black' ? { backgroundColor: c.hex } : undefined}
             />
-            <span className="flex-1 text-left text-[13px] text-gray-700 dark:text-gray-300">{c.label}</span>
-            {accentColor === c.label && <Check size={14} className="text-gray-900 dark:text-gray-100 shrink-0" />}
+            <span className="settings-option-label">
+              {c.label}{c.label === DEFAULT_ACCENT ? ' (Default)' : ''}
+            </span>
+            {accentColor === c.label && <Check size={14} className="settings-option-check shrink-0" />}
           </button>
         ))}
       </div>
@@ -232,10 +261,10 @@ export default function SettingsPage() {
   const filtered = NAV.filter((n) => n.label.toLowerCase().includes(search.toLowerCase()));
 
   return (
-    <div className="flex flex-col md:flex-row h-screen bg-white dark:bg-gray-950 overflow-hidden w-full">
+    <div className="flex flex-col md:flex-row h-screen bg-[var(--background)] text-[var(--foreground)] overflow-hidden w-full">
       {/* ── Settings sidebar / tab bar ── */}
-      <aside className="w-full md:w-[220px] shrink-0 bg-white dark:bg-gray-900
-                        border-b md:border-b-0 md:border-r border-gray-200 dark:border-gray-800
+      <aside className="settings-sidebar w-full md:w-[220px] shrink-0
+                        border-b md:border-b-0 md:border-r border-[color:var(--base-border)]
                         flex flex-col py-2 md:py-3 px-3">
         {/* Back link */}
         <Link
@@ -270,11 +299,9 @@ export default function SettingsPage() {
             <button
               key={n.id}
               onClick={() => setActive(n.id)}
-              className={`flex items-center gap-2 px-3 py-2 rounded-lg text-[13px]
+              className={`settings-nav-btn flex items-center gap-2 px-3 py-2 rounded-lg text-[13px]
                           whitespace-nowrap md:w-full text-left transition-colors min-h-[40px] ${
-                active === n.id
-                  ? 'bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-100 font-medium'
-                  : 'text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800'
+                active === n.id ? 'settings-nav-btn--active' : ''
               }`}
             >
               {n.icon}
@@ -286,9 +313,7 @@ export default function SettingsPage() {
 
       {/* ── Content ── */}
       <main className="flex-1 overflow-y-auto p-4 sm:p-6 md:p-8 flex justify-center items-start w-full min-w-0">
-        <div className="w-full max-w-[640px] min-h-0 border border-gray-200
-                        dark:border-gray-800 rounded-xl bg-white dark:bg-gray-900 p-4 sm:p-6
-                        shadow-sm flex flex-col">
+        <div className="settings-content-panel w-full max-w-[640px] min-h-0 p-4 sm:p-6 flex flex-col">
           {active === 'profile' && <ProfileSection />}
           {active === 'theme'   && <ThemeSection />}
           {active === 'color'   && <ColorSection />}

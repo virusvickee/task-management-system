@@ -7,6 +7,8 @@ import { apiFetch } from '@/lib/api';
 
 const ALL_MEMBERS = ['Alex Kim', 'Sam Lee', 'Morgan Chen', 'Jordan Park'];
 
+export { ALL_MEMBERS };
+
 const AVATAR_COLORS = [
   'bg-violet-500', 'bg-emerald-500', 'bg-orange-500', 'bg-pink-500', 'bg-blue-500',
 ];

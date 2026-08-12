@@ -1,4 +1,8 @@
+import { resetThemeToDefaults } from '@/context/theme-context';
+
 const API_BASE = process.env.NEXT_PUBLIC_API_URL;
+
+export const LOGIN_PATH = '/';
 
 function getToken() {
   if (typeof window === 'undefined') return null;
@@ -30,4 +34,13 @@ export async function guestLogin(name?: string) {
   localStorage.setItem('tms-token', data.accessToken);
   localStorage.setItem('tms-user', JSON.stringify(data.user));
   return data;
+}
+
+/** Clear session + reset theme, then hard-redirect to login for a clean slate. */
+export function logout() {
+  if (typeof window === 'undefined') return;
+  localStorage.removeItem('tms-token');
+  localStorage.removeItem('tms-user');
+  resetThemeToDefaults();
+  window.location.href = LOGIN_PATH;
 }

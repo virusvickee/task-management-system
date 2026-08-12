@@ -5,7 +5,7 @@ import type { Priority } from '@/lib/priority';
 const CONFIG: Record<Priority, { bars: number; color: string; textColor: string }> = {
   'No Priority': { bars: 0, color: 'bg-gray-300 dark:bg-gray-600', textColor: 'text-gray-400 dark:text-gray-500' },
   Urgent: { bars: 4, color: 'bg-red-500 dark:bg-red-400', textColor: 'text-red-600 dark:text-red-400' },
-  High: { bars: 3, color: 'bg-red-500 dark:bg-red-400', textColor: 'text-red-600 dark:text-red-400' },
+  High: { bars: 3, color: 'bg-orange-500 dark:bg-orange-400', textColor: 'text-orange-500 dark:text-orange-400' },
   Medium: { bars: 2, color: 'bg-amber-400 dark:bg-amber-400', textColor: 'text-amber-500 dark:text-amber-400' },
   Low: { bars: 1, color: 'bg-gray-300 dark:bg-gray-600', textColor: 'text-gray-400 dark:text-gray-500' },
 };

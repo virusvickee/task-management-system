@@ -1,10 +1,11 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
-
 :root {
+  color-scheme: light;
   --base-background: #FFFFFF;
   --background: #f8f8f8;
   --foreground: #171717;
@@ -61,7 +62,9 @@
   --card-hover-shadow: 0 2px 8px rgba(0,0,0,0.08);
 }
 
-.dark {
+html[data-theme='dark'],
+html.dark {
+  color-scheme: dark;
   --base-background: #1e1e1e;
   --background: #111111;
   --foreground: #ededed;
@@ -130,7 +133,265 @@ body {
   color: var(--foreground);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  transition: background-color 0.3s ease, color 0.3s ease;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+/* Full-app shell — theme (light/dark) drives these tokens */
+.dashboard-app-shell,
+.dashboard-page-root {
+  background: var(--background);
+  color: var(--foreground);
+  transition: background-color 0.25s ease, color 0.25s ease, border-color 0.25s ease;
+}
+
+html[data-theme='dark'] .dashboard-app-shell,
+html[data-theme='dark'] .dashboard-page-root,
+html.dark .dashboard-app-shell,
+html.dark .dashboard-page-root {
+  background: var(--background);
+  color: var(--foreground);
+}
+
+.theme-popover {
+  background: var(--base-popover);
+  border: 1px solid var(--base-border);
+  color: var(--base-primary);
+}
+
+.theme-popover-muted {
+  color: var(--base-muted-foreground);
+}
+
+.theme-popover-hover {
+  background: var(--base-muted);
+}
+
+.kanban-column {
+  border: 1px solid var(--base-border);
+  background: var(--column-bg);
+  color: var(--base-primary);
+}
+
+.kanban-column-input {
+  background: var(--card-bg);
+  border: 1px solid var(--base-border);
+  color: var(--base-primary);
+}
+
+.kanban-task-card {
+  background: var(--card-bg);
+  border: 1px solid var(--base-border);
+  color: var(--base-primary);
+}
+
+.fields-dropdown-panel {
+  background: var(--base-popover);
+  border: 1px solid var(--base-border);
+  color: var(--base-primary);
+}
+
+.fields-dropdown-segment {
+  background: var(--base-muted);
+}
+
+.fields-dropdown-item {
+  color: var(--base-primary);
+}
+
+.fields-dropdown-item:hover,
+.fields-dropdown-item--active {
+  background: var(--base-muted);
+}
+
+.fields-dropdown-item-icon {
+  color: var(--base-muted-foreground);
+}
+
+.fields-dropdown-divider {
+  border-top: 1px solid var(--base-border);
+}
+
+.fields-dropdown-view-btn {
+  color: var(--base-primary);
+}
+
+.fields-dropdown-view-btn--active {
+  background: var(--base-popover);
+}
+
+/* Fields column toggles — Figma: circle check on right */
+.fields-dropdown-toggle {
+  box-sizing: border-box;
+  width: 18px;
+  height: 18px;
+  border-radius: 9999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.fields-dropdown-toggle--on {
+  background: var(--base-primary, rgba(23, 23, 23, 1));
+  color: var(--base-background, rgba(255, 255, 255, 1));
+}
+
+.fields-dropdown-toggle--off {
+  border: 1.5px solid var(--base-border, rgba(229, 229, 229, 1));
+  background: transparent;
+}
+
+/* Filter dropdown — Figma: nested submenu opens left */
+.filter-dropdown-panel {
+  overflow: visible;
+}
+
+.filter-dropdown-submenu-header {
+  margin: 0;
+  padding: 4px 12px 6px;
+  font-size: 11px;
+  font-weight: 500;
+  line-height: 1;
+  color: var(--base-muted-foreground, rgba(115, 115, 115, 1));
+}
+
+.filter-dropdown-submenu {
+  overflow: visible;
+}
+
+/* Teams icon — Figma: 16 × 16, opacity 1 */
+.teams-icon {
+  box-sizing: border-box;
+  width: 16px;
+  height: 16px;
+  min-width: 16px;
+  min-height: 16px;
+  opacity: 1;
+  flex-shrink: 0;
+  display: block;
+}
+
+@media (max-width: 639px) {
+  .filter-dropdown-submenu {
+    right: auto;
+    left: 0;
+    top: 100%;
+    margin-right: 0;
+    margin-top: 4px;
+  }
+}
+
+.dashboard-toolbar-icon-btn[data-state='open'],
+.dashboard-toolbar-icon-btn[data-active='true'] {
+  background: var(--base-muted, rgba(245, 245, 245, 1));
+  color: var(--base-primary, rgba(23, 23, 23, 1));
+}
+
+.dark .dashboard-toolbar-icon-btn[data-state='open'],
+.dark .dashboard-toolbar-icon-btn[data-active='true'] {
+  background: rgba(38, 38, 38, 1);
+}
+
+/* List view tables — theme-driven */
+.list-view-section-title {
+  color: var(--base-primary);
+}
+
+.list-view-section-icon {
+  color: var(--base-muted-foreground);
+}
+
+.list-view-table-wrap {
+  border: 1px solid var(--base-border);
+  background: var(--base-background);
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.list-view-table-head {
+  background: var(--base-muted);
+  color: var(--base-muted-foreground);
+  border-bottom: 1px solid var(--base-border);
+}
+
+.list-view-table-row {
+  border-bottom: 1px solid var(--base-border);
+  color: var(--base-primary);
+}
+
+.list-view-table-row:hover {
+  background: var(--base-muted);
+}
+
+.list-view-table-cell-muted {
+  color: var(--base-muted-foreground);
+}
+
+.list-view-tag {
+  background: var(--tag-bg);
+  color: var(--tag-text);
+}
+
+/* Dashboard sidebar — Figma: 256 × full height, border-right 1px */
+.dashboard-sidebar {
+  box-sizing: border-box;
+  width: var(--sidebar-width, 256px);
+  height: 100%;
+  min-height: 100%;
+  opacity: 1;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  padding: 12px 10px;
+  border-right: 1px solid var(--base-border, rgba(229, 229, 229, 1));
+  background: var(--base-sidebar, rgba(250, 250, 250, 1));
+}
+
+.dashboard-sidebar-slot {
+  flex-shrink: 0;
+  height: 100%;
+}
+
+@media (min-width: 1024px) {
+  .dashboard-sidebar-slot--open {
+    width: var(--sidebar-width, 256px);
+  }
+
+  .dashboard-sidebar-slot--closed {
+    width: 0;
+    overflow: hidden;
+  }
+}
+
+/* Sidebar nav — default Figma active = grey bg only, no accent bar */
+.sidebar-nav-link {
+  color: var(--base-muted-foreground);
+}
+
+.sidebar-nav-link:hover {
+  background: var(--base-muted);
+  color: var(--base-primary);
+}
+
+.sidebar-nav-link--active {
+  background: var(--base-muted);
+  color: var(--base-primary);
+}
+
+.sidebar-user-name {
+  color: var(--base-primary);
+}
+
+/* Sidebar nav icons — 16×16 slot, stroke uses --base-primary */
+.sidebar-nav-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+  color: var(--base-primary, rgba(23, 23, 23, 1));
+  opacity: 1;
 }
 
 .task-page-description::placeholder {
@@ -144,6 +405,1036 @@ body {
 
 .task-page-input::placeholder {
   color: var(--base-muted-foreground);
+}
+
+/* Dashboard top bar — Figma: 1024 × 64, px spacing/4, border-bottom */
+.dashboard-top-header {
+  width: 100%;
+  height: 64px;
+  opacity: 1;
+  flex-shrink: 0;
+  border-bottom: 1px solid var(--base-border, rgba(229, 229, 229, 1));
+  background: var(--base-background);
+}
+
+.dashboard-top-header-inner {
+  margin-left: 0;
+  margin-right: auto;
+  width: 100%;
+  max-width: 1024px;
+  height: 64px;
+  padding-left: max(12px, env(safe-area-inset-left, 0px));
+  padding-right: max(12px, env(safe-area-inset-right, 0px));
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  opacity: 1;
+  transition: max-width 0.2s ease;
+  min-width: 0;
+}
+
+@media (min-width: 640px) {
+  .dashboard-top-header-inner {
+    padding-left: max(16px, env(safe-area-inset-left, 0px));
+    padding-right: max(16px, env(safe-area-inset-right, 0px));
+  }
+}
+
+/* Page content column — left-aligned flush with sidebar, max 976px */
+.dashboard-page-shell {
+  margin-left: 0;
+  margin-right: auto;
+  width: 100%;
+  max-width: 976px;
+  box-sizing: border-box;
+  padding: 12px;
+  transition: max-width 0.2s ease;
+}
+
+.dashboard-page-content {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  flex: 1;
+  min-height: 0;
+  opacity: 1;
+}
+
+@media (min-width: 640px) {
+  .dashboard-page-shell {
+    padding: 16px;
+  }
+}
+
+@media (min-width: 1024px) {
+  .dashboard-page-shell {
+    padding: 16px 20px;
+  }
+
+  /* Breathing room between sidebar and main content */
+  .dashboard-app-shell > [data-sidebar-open='true'] {
+    padding-left: 12px;
+  }
+}
+
+[data-sidebar-open='false'] .dashboard-page-shell,
+[data-sidebar-open='false'] .dashboard-top-header-inner {
+  max-width: 100%;
+}
+
+/* Kanban area — responsive horizontal scroll + padding */
+.dashboard-kanban-area {
+  min-width: 0;
+}
+
+.dashboard-kanban-inner {
+  min-width: max-content;
+  gap: 12px;
+  padding: 12px;
+}
+
+@media (min-width: 640px) {
+  .dashboard-kanban-inner {
+    padding: 12px 16px;
+    gap: 16px;
+  }
+}
+
+@media (min-width: 1024px) {
+  .dashboard-kanban-inner {
+    padding: 0 20px 16px 0;
+  }
+}
+
+/* Kanban / board — extra horizontal room when sidebar is collapsed */
+[data-sidebar-open='false'] .dashboard-kanban-inner {
+  padding-left: 20px;
+  padding-right: 20px;
+}
+
+@media (min-width: 1280px) {
+  [data-sidebar-open='false'] .dashboard-kanban-inner {
+    padding-left: 32px;
+    padding-right: 32px;
+  }
+}
+
+/* Sidebar toggle — Figma: icon 28 × 28, rounded-4xl, PanelLeft */
+.dashboard-sidebar-toggle-btn {
+  box-sizing: border-box;
+  width: 28px;
+  height: 28px;
+  min-width: 28px;
+  min-height: 28px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 1;
+  flex-shrink: 0;
+  padding: 0;
+  border: none;
+  border-radius: 2rem;
+  background: transparent;
+  color: var(--base-muted-foreground, rgba(115, 115, 115, 1));
+  cursor: pointer;
+  transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+.dashboard-sidebar-toggle-btn:hover {
+  background: var(--base-muted, rgba(245, 245, 245, 1));
+  color: var(--base-primary, rgba(23, 23, 23, 1));
+}
+
+.dark .dashboard-sidebar-toggle-btn:hover {
+  background: rgba(38, 38, 38, 1);
+  color: var(--base-primary, rgba(237, 237, 237, 1));
+}
+
+.dashboard-top-header-divider {
+  box-sizing: border-box;
+  width: 8px;
+  height: 15px;
+  min-width: 8px;
+  min-height: 15px;
+  flex-shrink: 0;
+  opacity: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.dashboard-top-header-divider::before {
+  content: '';
+  width: 1px;
+  height: 15px;
+  background: var(--base-border, rgba(229, 229, 229, 1));
+}
+
+/* Breadcrumb in top header — Figma: Projects > Project name */
+.dashboard-top-header-breadcrumb {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  min-width: 0;
+  flex: 1;
+  opacity: 1;
+  font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 100%;
+  letter-spacing: 0;
+}
+
+.dashboard-top-header-breadcrumb a {
+  color: var(--base-muted-foreground, rgba(115, 115, 115, 1));
+  text-decoration: none;
+  flex-shrink: 0;
+  transition: color 0.15s ease;
+}
+
+.dashboard-top-header-breadcrumb a:hover {
+  color: var(--base-primary, rgba(23, 23, 23, 1));
+}
+
+.dark .dashboard-top-header-breadcrumb a:hover {
+  color: var(--base-primary, rgba(237, 237, 237, 1));
+}
+
+.dashboard-top-header-breadcrumb-sep {
+  color: var(--base-muted-foreground, rgba(115, 115, 115, 1));
+  flex-shrink: 0;
+}
+
+.dashboard-top-header-breadcrumb-current {
+  color: var(--base-muted-foreground, rgba(115, 115, 115, 1));
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  min-width: 0;
+}
+
+/* Page title — Figma: 64 × 16, base/semibold, line-height 100% */
+.dashboard-page-title {
+  box-sizing: border-box;
+  width: auto;
+  min-width: 64px;
+  height: 16px;
+  min-height: 16px;
+  margin: 0;
+  padding: 0;
+  opacity: 1;
+  font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-size: 16px;
+  font-weight: 600;
+  font-style: normal;
+  line-height: 100%;
+  letter-spacing: 0;
+  color: var(--base-primary, rgba(23, 23, 23, 1));
+  white-space: nowrap;
+}
+
+.dashboard-page-meta {
+  font-size: 11px;
+  line-height: 32px;
+  color: var(--base-muted-foreground, rgba(115, 115, 115, 1));
+  white-space: nowrap;
+}
+
+/* Page title + tools row — Figma: 976 × 32, space-between */
+.dashboard-page-toolbar {
+  width: 100%;
+  min-height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  opacity: 1;
+  gap: 8px;
+}
+
+@media (min-width: 640px) {
+  .dashboard-page-toolbar {
+    height: 32px;
+  }
+}
+
+/* Toolbar actions cluster — Figma: gap 8 (Search + Fields + Add Task) */
+.dashboard-page-toolbar-actions {
+  width: auto;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  opacity: 1;
+  flex-shrink: 0;
+}
+
+.dashboard-page-toolbar-actions--search-open {
+  width: auto;
+  min-width: 262px;
+  max-width: 100%;
+}
+
+/* Toolbar search input — Figma: 373×32, icon start + kbd end, gap 6 */
+.dashboard-toolbar-search {
+  box-sizing: border-box;
+  width: 373px;
+  max-width: 100%;
+  height: 32px;
+  min-height: 32px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  opacity: 1;
+  padding: 8px 12px;
+  border: 1px solid var(--base-border, rgba(229, 229, 229, 1));
+  border-radius: 4px;
+  background: var(--base-background);
+  flex-shrink: 1;
+  min-width: 0;
+  cursor: text;
+}
+
+.dashboard-toolbar-search-icon {
+  color: var(--base-muted-foreground, rgba(115, 115, 115, 1));
+  flex-shrink: 0;
+}
+
+.dashboard-toolbar-search-input {
+  box-sizing: border-box;
+  flex: 1;
+  min-width: 0;
+  height: 16px;
+  margin: 0;
+  padding: 0;
+  border: none;
+  outline: none;
+  background: transparent;
+  font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-size: 12px;
+  font-weight: 400;
+  font-style: normal;
+  line-height: 16px;
+  letter-spacing: 0;
+  color: var(--base-primary, rgba(23, 23, 23, 1));
+}
+
+.dashboard-toolbar-search-input::placeholder {
+  color: var(--base-muted-foreground, rgba(115, 115, 115, 1));
+}
+
+.dashboard-toolbar-search-input::-webkit-search-cancel-button {
+  display: none;
+}
+
+/* Kbd addon — Figma: Variant Kbd Default, 31×22, text ⌘F */
+.dashboard-toolbar-search-kbd {
+  box-sizing: border-box;
+  width: 31px;
+  height: 22px;
+  min-width: 31px;
+  min-height: 22px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 1;
+  padding: 0;
+  border: 1px solid var(--base-border, rgba(229, 229, 229, 1));
+  border-radius: 4px;
+  background: var(--base-background);
+  font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-size: 11px;
+  font-weight: 500;
+  font-style: normal;
+  line-height: 1;
+  letter-spacing: 0;
+  color: var(--base-muted-foreground, rgba(115, 115, 115, 1));
+  flex-shrink: 0;
+  pointer-events: none;
+  user-select: none;
+}
+
+.dark .dashboard-toolbar-search-kbd {
+  background: var(--base-background);
+}
+
+@media (max-width: 639px) {
+  .dashboard-toolbar-search {
+    width: 100%;
+    min-width: 0;
+  }
+}
+
+/* Toolbar icon button — Figma: Default sm, 32×32, radius 4px, border 1px */
+.dashboard-toolbar-icon-btn {
+  box-sizing: border-box;
+  width: 32px;
+  height: 32px;
+  min-width: 32px;
+  min-height: 32px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  opacity: 1;
+  padding: 8px;
+  border: 1px solid var(--base-border, rgba(229, 229, 229, 1));
+  border-radius: 4px;
+  background: var(--base-background);
+  color: var(--base-muted-foreground, rgba(115, 115, 115, 1));
+  flex-shrink: 0;
+  cursor: pointer;
+  transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+.dashboard-toolbar-icon-btn:hover {
+  background: var(--base-muted, rgba(245, 245, 245, 1));
+  color: var(--base-primary, rgba(23, 23, 23, 1));
+}
+
+.dark .dashboard-toolbar-icon-btn:hover {
+  background: rgba(38, 38, 38, 1);
+  color: var(--base-primary, rgba(237, 237, 237, 1));
+}
+
+/* Toolbar icons — Figma: 14 × 14, opacity 1 (Search, Filter, Fields, etc.) */
+.dashboard-toolbar-icon,
+.dashboard-toolbar-fields-icon {
+  box-sizing: border-box;
+  width: 14px;
+  height: 14px;
+  min-width: 14px;
+  min-height: 14px;
+  opacity: 1;
+  flex-shrink: 0;
+  display: block;
+}
+
+.dashboard-toolbar-icon-btn .dashboard-toolbar-icon {
+  display: block;
+}
+
+/* Fields button — Figma: Default sm, 78×32, icon + "Fields" */
+.dashboard-toolbar-fields-btn {
+  box-sizing: border-box;
+  width: 78px;
+  height: 32px;
+  min-width: 78px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  opacity: 1;
+  padding: 8px 12px;
+  border: 1px solid var(--base-border, rgba(229, 229, 229, 1));
+  border-radius: 4px;
+  background: var(--base-background);
+  color: var(--base-primary, rgba(23, 23, 23, 1));
+  flex-shrink: 0;
+  cursor: pointer;
+  transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+/* Fields label — Figma: 34×16, text/xs medium, base-primary */
+.dashboard-toolbar-fields-label {
+  box-sizing: border-box;
+  width: 34px;
+  height: 16px;
+  min-width: 34px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 1;
+  font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-size: 12px;
+  font-weight: 500;
+  font-style: normal;
+  line-height: 16px;
+  letter-spacing: 0;
+  vertical-align: middle;
+  color: var(--base-primary, rgba(23, 23, 23, 1));
+  flex-shrink: 0;
+}
+
+.dashboard-toolbar-fields-btn:hover,
+.dashboard-toolbar-fields-btn[data-state='open'],
+.dashboard-toolbar-fields-btn[data-active='true'] {
+  background: var(--base-muted, rgba(245, 245, 245, 1));
+}
+
+.dark .dashboard-toolbar-fields-btn:hover,
+.dark .dashboard-toolbar-fields-btn[data-state='open'],
+.dark .dashboard-toolbar-fields-btn[data-active='true'] {
+  background: rgba(38, 38, 38, 1);
+}
+
+/* Add Task button — theme-aware primary */
+.dashboard-toolbar-add-task-btn {
+  box-sizing: border-box;
+  width: 96px;
+  height: 32px;
+  min-width: 96px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  opacity: 1;
+  padding: 8px 12px;
+  border: none;
+  border-radius: 6px;
+  background: var(--btn-primary-bg, rgba(23, 23, 23, 1));
+  color: var(--btn-primary-fg, rgba(255, 255, 255, 1));
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 1;
+  flex-shrink: 0;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: opacity 0.15s ease;
+}
+
+.dashboard-toolbar-add-task-btn:hover {
+  opacity: 0.9;
+}
+
+.dashboard-toolbar-add-task-label {
+  flex-shrink: 0;
+}
+
+/* ── Dashboard responsive — mobile, tablet, desktop ── */
+@media (max-width: 767px) {
+  .dashboard-page-toolbar {
+    flex-direction: column;
+    align-items: stretch;
+    height: auto;
+    min-height: 32px;
+    gap: 12px;
+  }
+
+  .dashboard-page-toolbar-actions {
+    width: 100%;
+    height: auto;
+    min-height: 32px;
+    flex-wrap: wrap;
+    row-gap: 8px;
+    justify-content: flex-start;
+  }
+
+  .dashboard-page-toolbar-actions:has(.dashboard-toolbar-search) .dashboard-toolbar-search {
+    flex: 1 1 100%;
+    width: 100%;
+    max-width: none;
+    order: -1;
+  }
+}
+
+@media (max-width: 479px) {
+  .dashboard-toolbar-fields-label {
+    display: none;
+  }
+
+  .dashboard-toolbar-fields-btn {
+    width: 32px;
+    min-width: 32px;
+    padding: 8px;
+  }
+
+  .dashboard-toolbar-add-task-btn {
+    width: 32px;
+    min-width: 32px;
+    padding: 8px;
+    gap: 0;
+  }
+
+  .dashboard-toolbar-add-task-label {
+    display: none;
+  }
+
+  .dashboard-top-header-breadcrumb a {
+    max-width: 72px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+}
+
+@media (min-width: 480px) and (max-width: 767px) {
+  .dashboard-toolbar-search {
+    width: min(373px, 100%);
+  }
+}
+
+/* Projects table card — Figma: min 224px height; grows with rows */
+.dashboard-projects-table-wrap {
+  width: 100%;
+  height: auto;
+  min-height: 224px;
+  opacity: 1;
+  border-radius: 8px;
+  border: 1px solid var(--base-border, rgba(229, 229, 229, 1));
+  background: var(--base-background);
+  overflow: hidden;
+  box-sizing: border-box;
+  max-width: 100%;
+}
+
+.dashboard-projects-table-scroll {
+  width: 100%;
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.dashboard-projects-table-scroll::-webkit-scrollbar {
+  display: none;
+}
+
+.dashboard-projects-table {
+  width: 100%;
+  min-width: 903px;
+  border-collapse: collapse;
+  table-layout: fixed;
+}
+
+.dashboard-projects-table thead tr {
+  height: 40px;
+  background: var(--base-muted, rgba(245, 245, 245, 1));
+  border-bottom: 1px solid var(--base-border, rgba(229, 229, 229, 1));
+}
+
+.dashboard-projects-table th {
+  padding: 0 16px;
+  text-align: left;
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 100%;
+  color: var(--base-muted-foreground, rgba(115, 115, 115, 1));
+  white-space: nowrap;
+}
+
+.dashboard-projects-table tbody tr {
+  height: 48px;
+  border-bottom: 1px solid var(--base-border, rgba(229, 229, 229, 1));
+  transition: background-color 0.15s ease;
+}
+
+.dashboard-projects-table tbody tr:hover {
+  background: var(--base-muted, rgba(245, 245, 245, 1));
+}
+
+.dashboard-projects-table td {
+  padding: 0 16px;
+  vertical-align: middle;
+}
+
+/* Figma project name cell — 469 × 48, text/sm medium, base-primary */
+.projects-table-name {
+  box-sizing: border-box;
+  width: 100%;
+  max-width: 469px;
+  height: 48px;
+  opacity: 1;
+  display: inline-flex;
+  align-items: center;
+  vertical-align: middle;
+  font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  font-style: normal;
+  line-height: 20px;
+  letter-spacing: 0;
+  color: var(--base-primary, rgba(23, 23, 23, 1));
+}
+
+.projects-table-priority-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 48px;
+  font-size: 13px;
+  font-weight: 500;
+  background: transparent;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+}
+
+.projects-table-priority-btn:hover {
+  opacity: 0.85;
+}
+
+/* Figma Projects name column/cell — 469 × 48, opacity 1 */
+.dashboard-projects-table-col-projects {
+  box-sizing: border-box;
+  width: 469px;
+  min-width: 469px;
+  max-width: 469px;
+  height: 48px;
+  opacity: 1;
+  vertical-align: middle;
+}
+
+/* Figma table column — 120.75 × 180, opacity 1 */
+.dashboard-projects-table-col-fixed {
+  box-sizing: border-box;
+  width: 120.75px;
+  min-width: 120.75px;
+  max-width: 120.75px;
+  opacity: 1;
+  vertical-align: middle;
+}
+
+.projects-table-col-menu {
+  box-sizing: border-box;
+  width: auto;
+  min-width: 148px;
+  height: auto;
+  max-height: 280px;
+  opacity: 1;
+  padding: 4px;
+  overflow-y: auto;
+  background: var(--base-popover, rgba(255, 255, 255, 1));
+  border-color: var(--base-border, rgba(229, 229, 229, 1));
+}
+
+.projects-table-menu-label {
+  padding: 4px 8px;
+  font-size: 11px;
+  color: var(--base-muted-foreground, rgba(115, 115, 115, 1));
+}
+
+.projects-table-skeleton {
+  height: 16px;
+  max-width: 320px;
+  margin: 4px 0;
+  border-radius: 4px;
+  background: var(--base-muted, rgba(245, 245, 245, 1));
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+.projects-table-add-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--base-primary, rgba(23, 23, 23, 1));
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  transition: opacity 0.15s ease;
+}
+
+.projects-table-add-btn:hover {
+  opacity: 0.85;
+}
+
+.projects-table-input {
+  width: 100%;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--foreground);
+  background: var(--base-background);
+  border: 1px solid var(--base-border);
+  border-radius: 4px;
+  padding: 4px 8px;
+  outline: none;
+  height: 32px;
+}
+
+.projects-table-input::placeholder {
+  color: var(--base-muted-foreground);
+}
+
+.projects-table-footer-input {
+  width: 100%;
+  font-size: 14px;
+  color: var(--foreground);
+  background: var(--base-background);
+  border: 1px solid var(--base-border);
+  border-radius: 8px;
+  padding: 4px 12px;
+  outline: none;
+}
+
+.projects-table-footer-input::placeholder {
+  color: var(--base-muted-foreground);
+}
+
+.projects-table-due-btn {
+  font-size: 13px;
+  font-weight: 400;
+  line-height: 100%;
+  color: var(--base-primary, rgba(23, 23, 23, 1));
+  background: transparent;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  height: 48px;
+  display: inline-flex;
+  align-items: center;
+}
+
+.projects-table-due-btn:hover {
+  opacity: 0.85;
+}
+
+.projects-table-due-empty {
+  color: var(--base-muted-foreground, rgba(115, 115, 115, 1));
+  opacity: 0.5;
+}
+
+.projects-table-lead-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 9999px;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  background: transparent;
+}
+
+.projects-table-lead-avatar {
+  width: 28px;
+  height: 28px;
+  border-radius: 9999px;
+  object-fit: cover;
+}
+
+.projects-table-lead-initials {
+  width: 28px;
+  height: 28px;
+  border-radius: 9999px;
+  background: rgba(229, 229, 229, 1);
+  color: rgba(64, 64, 64, 1);
+  font-size: 10px;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.dark .projects-table-lead-initials {
+  background: rgba(64, 64, 64, 1);
+  color: rgba(212, 212, 212, 1);
+}
+
+.projects-table-lead-add {
+  width: 28px;
+  height: 28px;
+  border-radius: 9999px;
+  border: 1px dashed var(--base-border, rgba(229, 229, 229, 1));
+  color: var(--base-muted-foreground, rgba(115, 115, 115, 1));
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.projects-table-actions-btn {
+  width: 32px;
+  height: 32px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-left: auto;
+  border: none;
+  background: transparent;
+  color: var(--base-muted-foreground, rgba(115, 115, 115, 1));
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.projects-table-actions-btn:hover {
+  color: var(--base-primary, rgba(23, 23, 23, 1));
+  background: var(--base-muted, rgba(245, 245, 245, 1));
+}
+
+.dark .projects-table-actions-btn:hover {
+  color: var(--base-primary, rgba(237, 237, 237, 1));
+  background: var(--base-muted, rgba(38, 38, 38, 1));
+}
+
+.dashboard-projects-table-footer {
+  height: 40px;
+  padding: 0 12px;
+  border-top: 1px solid var(--base-border, rgba(229, 229, 229, 1));
+  display: flex;
+  align-items: center;
+}
+
+@media (min-width: 640px) {
+  .dashboard-projects-table-footer {
+    padding: 0 16px;
+  }
+}
+
+/* ── Settings / Theme (Figma) ── */
+.settings-sidebar {
+  background: var(--base-background);
+}
+
+.settings-content-panel {
+  border: 1px solid var(--base-border);
+  border-radius: 12px;
+  background: var(--base-background);
+  box-shadow: var(--shadowxsoffset-x) var(--shadowxsoffset-y) var(--shadowxsblur-radius) var(--shadowxsspread-radius) var(--shadowxscolor);
+}
+
+.settings-section-title {
+  margin: 0 0 8px;
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--base-primary);
+}
+
+.settings-section-desc {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--base-muted-foreground);
+}
+
+.settings-option-list {
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--base-border);
+  border-radius: 12px;
+  overflow: hidden;
+  background: var(--base-background);
+}
+
+.settings-option-btn {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 16px;
+  border: none;
+  border-bottom: 1px solid var(--base-border);
+  background: transparent;
+  color: var(--base-primary);
+  font-size: 13px;
+  font-weight: 500;
+  text-align: left;
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+}
+
+.settings-option-btn:last-child {
+  border-bottom: none;
+}
+
+.settings-option-btn:hover {
+  background: var(--base-muted);
+}
+
+.settings-option-btn--active {
+  background: var(--base-muted);
+}
+
+.settings-option-check {
+  color: var(--accent-color);
+}
+
+.settings-restore-defaults-btn {
+  width: 100%;
+  padding: 10px 14px;
+  border: 1px solid var(--base-border);
+  border-radius: 8px;
+  background: var(--base-background);
+  color: var(--base-primary);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+}
+
+.settings-restore-defaults-btn:hover {
+  background: var(--base-muted);
+}
+
+.settings-option-icon {
+  display: inline-flex;
+  color: var(--base-muted-foreground);
+}
+
+.settings-option-label {
+  flex: 1;
+}
+
+.settings-color-swatch {
+  width: 16px;
+  height: 16px;
+  border-radius: 4px;
+  flex-shrink: 0;
+}
+
+.settings-color-swatch--black {
+  background: #171717;
+  border: 1px solid var(--base-border);
+}
+
+.dark .settings-color-swatch--black {
+  background: #ededed;
+}
+
+.settings-theme-preview {
+  width: 40px;
+  height: 28px;
+  border-radius: 6px;
+  border: 1px solid var(--base-border);
+  padding: 4px;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  flex-shrink: 0;
+}
+
+.settings-theme-preview[data-theme-preview='light'] {
+  background: #ffffff;
+}
+
+.settings-theme-preview[data-theme-preview='dark'] {
+  background: #1e1e1e;
+}
+
+.settings-theme-preview-bar {
+  height: 4px;
+  border-radius: 2px;
+  background: var(--accent-color);
+}
+
+.settings-theme-preview-line {
+  height: 3px;
+  border-radius: 2px;
+  background: var(--base-border);
+}
+
+.settings-theme-preview-line--short {
+  width: 70%;
+}
+
+.settings-nav-btn {
+  color: var(--base-muted-foreground);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+}
+
+.settings-nav-btn:hover {
+  background: var(--base-muted);
+  color: var(--base-primary);
+}
+
+.settings-nav-btn--active {
+  background: var(--base-muted);
+  color: var(--base-primary);
+  font-weight: 500;
 }
 
 h1,

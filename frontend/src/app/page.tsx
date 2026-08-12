@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { guestLogin } from '@/lib/api';
+import { resetThemeToDefaults } from '@/context/theme-context';
 import { useRouter } from 'next/navigation';
 
 /* ─── Inline SVGs ────────────────────────────────────────── */
@@ -72,6 +73,7 @@ export default function LoginPage() {
       setLoading(true);
       setError('');
       await guestLogin();
+      resetThemeToDefaults();
       router.push('/dashboard');
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : 'Something went wrong');

@@ -48,9 +48,10 @@ export default function TaskCard({
   borderColor?: string;
 }) {
   const router = useRouter();
-  const bg = cardBg ?? '#ffffff';
-  const tc = textColor ?? '#171717';
-  const bc = borderColor ?? 'rgba(229,229,229,1)';
+  const useThemeClasses = cardBg === undefined;
+  const bg = cardBg ?? 'var(--card-bg)';
+  const tc = textColor ?? 'var(--base-primary)';
+  const bc = borderColor ?? 'var(--base-border)';
 
   function handleDragStart(e: React.DragEvent) {
     e.dataTransfer.setData('taskId', task._id);
@@ -92,7 +93,7 @@ export default function TaskCard({
       draggable
       onDragStart={handleDragStart}
       onClick={() => router.push(`/dashboard/tasks/${task._id}`)}
-      className="group hover:shadow-md transition-all duration-150 cursor-pointer"
+      className={`group hover:shadow-md transition-all duration-150 cursor-pointer${useThemeClasses ? ' kanban-task-card' : ''}`}
       style={{
         width: '273px',
         minHeight: '114px',

@@ -45,6 +45,13 @@ export function formatFullDate(dateStr: string | null): string | null {
   return parsed.toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric' });
 }
 
+/** Figma table format: 12 Sep 2026 (timezone-safe) */
+export function formatTableDate(dateStr: string | null | undefined): string | null {
+  const parsed = parseDateString(dateStr ?? null);
+  if (!parsed) return null;
+  return parsed.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+}
+
 export default function DatePickerPopover({
   selectedDate,
   onSelectDate,
