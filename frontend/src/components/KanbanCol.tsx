@@ -69,7 +69,6 @@ export default function KanbanCol({ title, tasks, onDrop, onAddTask, fields }: P
         className={`rounded-[8px] flex flex-col transition-colors ${dragOver ? 'ring-2 ring-blue-400' : ''}`}
         style={{ width: '289px', minHeight: 'auto', border: `1px solid ${borderColor}`, background: colBg }}
       >
-        {/* Header */}
         <div className="flex items-center justify-between w-[289px] h-[39px] px-3 shrink-0">
           <div className="flex items-center gap-2 min-w-0">
             <GripVertical size={13} style={{ color: textColor }} className="cursor-grab shrink-0" strokeWidth={2.5} />
@@ -85,7 +84,6 @@ export default function KanbanCol({ title, tasks, onDrop, onAddTask, fields }: P
           </div>
         </div>
 
-        {/* Cards */}
         <div className="flex flex-col items-center gap-4 p-3">
           {tasks.map((task) => (
             <TaskCard key={task._id} task={task} fields={fields} cardBg={cardBg} textColor={textColor} borderColor={borderColor} />

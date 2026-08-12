@@ -34,14 +34,15 @@ export default function DateBadgeDestructive({
 }: DateBadgeDestructiveProps) {
   const containerStyle: React.CSSProperties = {
     background: "var(--custom-destructive-10-dark-destructive-20, rgba(220, 38, 38, 0.1))",
-    borderTop: "1px solid var(--tailwind-colors-base-transparent, rgba(255, 255, 255, 1))",
-    width: "67px",
+    width: "66px",
     height: "20px",
+    gap: "4px",
+    padding: "2px 8px",
   };
 
   return (
     <div
-      className="flex items-center justify-center gap-1 rounded-3xl border border-gray-200 dark:border-gray-700 pt-0.5 pb-0.5 pr-2 pl-2"
+      className="flex items-center justify-center rounded-3xl border border-red-200/60 dark:border-red-900/50"
       style={containerStyle}
     >
       {showLeftIcon && <Icon size={11} className="text-red-600 dark:text-red-400 shrink-0" />}

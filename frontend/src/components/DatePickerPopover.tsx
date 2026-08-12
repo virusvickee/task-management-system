@@ -173,7 +173,7 @@ export default function DatePickerPopover({
     >
       <div
         ref={popoverRef}
-        className="w-[200px] h-[250px] max-w-[calc(100vw-1.5rem)] max-h-[calc(100vh-1.5rem)] overflow-hidden bg-white dark:bg-gray-900 border border-gray-200/80 dark:border-gray-800 rounded-md shadow-[0_12px_36px_rgba(0,0,0,0.12)] dark:shadow-[0_12px_36px_rgba(0,0,0,0.4)] p-3 select-none flex flex-col gap-3"
+        className="w-[220px] h-[260px] max-w-[calc(100vw-1.5rem)] max-h-[calc(100vh-1.5rem)] overflow-hidden bg-white dark:bg-gray-900 border border-gray-200/80 dark:border-gray-800 rounded-md shadow-[0_12px_36px_rgba(0,0,0,0.12)] dark:shadow-[0_12px_36px_rgba(0,0,0,0.4)] p-3 select-none flex flex-col gap-3"
       >
         {/* Header row */}
         <div className="flex items-center justify-between px-1">
@@ -183,9 +183,9 @@ export default function DatePickerPopover({
             className="p-1 text-gray-500 dark:text-gray-400 hover:text-gray-900 hover:bg-gray-100 dark:hover:text-gray-100 dark:hover:bg-gray-800 rounded-md transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent-color)]"
             aria-label="Previous month"
           >
-            <ChevronLeft size={18} />
+            <ChevronLeft size={16} strokeWidth={1.75} />
           </button>
-          <span className="text-[15px] font-medium text-gray-900 dark:text-gray-100">
+          <span className="text-[15px] font-medium text-black dark:text-gray-100">
             {monthName} {viewYear}
           </span>
           <button
@@ -194,24 +194,37 @@ export default function DatePickerPopover({
             className="p-1 text-gray-500 dark:text-gray-400 hover:text-gray-900 hover:bg-gray-100 dark:hover:text-gray-100 dark:hover:bg-gray-800 rounded-md transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent-color)]"
             aria-label="Next month"
           >
-            <ChevronRight size={18} />
+            <ChevronRight size={16} strokeWidth={1.75} />
           </button>
         </div>
 
         {/* Weekday headers */}
         <div className="grid grid-cols-7 text-center">
           {['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'].map((day) => (
-            <span key={day} className="text-[11px] font-normal text-gray-400 dark:text-gray-500">
+            <span key={day} className="text-[11px] font-normal text-gray-500 dark:text-gray-400">
               {day}
             </span>
           ))}
         </div>
 
         {/* Days grid */}
-        <div className="grid grid-cols-7 gap-y-1 justify-items-center flex-1 content-between">
+        <div className="grid grid-cols-7 gap-y-1.5 justify-items-center flex-1 content-between">
           {days.map((item, index) => {
             const isSelected = selectedDateStr === item.dateStr;
             const isToday = todayStr === item.dateStr;
+
+            let dayClass =
+              'w-7 h-7 text-[12px] flex items-center justify-center rounded-full transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black/20 dark:focus-visible:ring-white/20';
+
+            if (isSelected) {
+              dayClass += ' bg-black text-white font-medium dark:bg-white dark:text-black';
+            } else if (isToday) {
+              dayClass += ' bg-gray-100 text-black font-normal hover:bg-gray-200 dark:bg-gray-800 dark:text-gray-100 dark:hover:bg-gray-700';
+            } else if (item.isCurrentMonth) {
+              dayClass += ' text-black font-normal hover:bg-gray-100 dark:text-gray-100 dark:hover:bg-gray-800';
+            } else {
+              dayClass += ' text-gray-400 font-normal hover:bg-gray-100 dark:text-gray-600 dark:hover:bg-gray-800';
+            }
 
             return (
               <button
@@ -225,16 +238,7 @@ export default function DatePickerPopover({
                   onSelectDate(item.dateStr);
                   onClose();
                 }}
-                className={`w-5 h-5 text-[11px] font-normal flex items-center justify-center rounded-full transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent-color)] ${
-                  isSelected
-                    ? 'text-white font-medium shadow-sm'
-                    : isToday
-                    ? 'bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-100 font-medium hover:bg-gray-200 dark:hover:bg-gray-700'
-                    : item.isCurrentMonth
-                    ? 'text-gray-900 dark:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-800'
-                    : 'text-gray-400 dark:text-gray-600 hover:bg-gray-100 dark:hover:bg-gray-800'
-                }`}
-                style={isSelected ? { backgroundColor: 'var(--accent-color)' } : undefined}
+                className={dayClass}
               >
                 {item.day}
               </button>

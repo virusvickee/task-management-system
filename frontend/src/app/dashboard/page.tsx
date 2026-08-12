@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
+import { usePathname } from 'next/navigation';
 import {
   PanelLeft,
   Search, Filter, Plus,
@@ -53,6 +54,7 @@ function matchesFilters(task: Task, filters: TaskFilters): boolean {
 }
 
 export default function DashboardPage() {
+  const pathname = usePathname();
   const { sidebarOpen, setSidebarOpen } = useSidebar();
   const { theme } = useTheme();
   const bg = theme === 'dark' ? '#111111' : '#ffffff';
@@ -67,7 +69,11 @@ export default function DashboardPage() {
     labels: false, status: false, reporter: false,
   });
   const searchRef = useRef<HTMLInputElement>(null);
-  const { tasksByColumn, createTask, updateTask } = useTasks();
+  const { tasksByColumn, createTask, updateTask, refetch } = useTasks();
+
+  useEffect(() => {
+    if (pathname === '/dashboard') refetch();
+  }, [pathname, refetch]);
 
   const handleDrop = (taskId: string, status: Status) => updateTask(taskId, { status });
 

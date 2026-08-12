@@ -6,6 +6,7 @@ import { apiFetch, guestLogin } from '@/lib/api';
 export interface Task {
   _id: string;
   title: string;
+  description?: string;
   status: string;
   priority?: string;
   assignee?: string;
@@ -20,6 +21,7 @@ export interface Task {
   reporterName?: string;
   locked?: boolean;
   resources?: { title: string; url: string }[];
+  subtasks?: Task[];
   comments?: {
     _id?: string;
     author: string;
@@ -42,6 +44,13 @@ export function useTasks(projectId?: string) {
 
   useEffect(() => {
     ensureAuth()
+      .then(() => apiFetch(projectId ? `/tasks?projectId=${projectId}` : '/tasks'))
+      .then(setTasks)
+      .catch(console.error);
+  }, [projectId]);
+
+  const refetch = useCallback(() => {
+    return ensureAuth()
       .then(() => apiFetch(projectId ? `/tasks?projectId=${projectId}` : '/tasks'))
       .then(setTasks)
       .catch(console.error);
@@ -77,5 +86,5 @@ export function useTasks(projectId?: string) {
     }
   }, [projectId]);
 
-  return { tasks, tasksByColumn, createTask, updateTask };
+  return { tasks, tasksByColumn, createTask, updateTask, refetch };
 }

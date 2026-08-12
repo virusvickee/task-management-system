@@ -1,6 +1,6 @@
 'use client';
 
-import { CalendarDays, MoreHorizontal, Tag } from 'lucide-react';
+import { MoreHorizontal, Tag } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import type { Task } from '@/hooks/useTasks';
 import { apiFetch } from '@/lib/api';
@@ -12,7 +12,6 @@ import {
 } from '@/components/ui/dropdown-menu';
 import DateBadgeDestructive from './ui/DateBadgeDestructive';
 
-/* ── Avatar helpers ── */
 const AVATAR_GRADIENTS = [
   'from-violet-400 to-purple-600',
   'from-emerald-400 to-teal-600',
@@ -106,12 +105,10 @@ export default function TaskCard({
         flexDirection: 'column',
       }}
     >
-      {/* ── Title row ── */}
       <div className="flex items-start justify-between gap-2 w-full">
         <p className="text-[15px] font-semibold leading-snug flex-1" style={{ color: tc }}>
           {task.title}
         </p>
-        {/* ── Actions dropdown — draggable=false so it never swallows the drag pointer ── */}
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <button
@@ -143,7 +140,6 @@ export default function TaskCard({
         </DropdownMenu>
       </div>
 
-      {/* ── Assignee + Due Date row ── */}
       <div className="flex items-center justify-between mb-[10px]" style={{ width: '247px', height: '20px' }}>
         {fields.members ? (
           <div className="flex items-center gap-[6px]" style={{ width: '210px', height: '20px' }}>
@@ -169,8 +165,7 @@ export default function TaskCard({
         )}
       </div>
 
-      {/* ── Tags row ── */}
-      {fields.labels && task.tags.length > 0 && (
+      {task.tags.length > 0 && (
         <div className="flex flex-wrap gap-[6px]" style={{ width: '247px', height: '20px' }}>
           {task.tags.map((tag) => (
             <span
