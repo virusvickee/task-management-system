@@ -1,7 +1,11 @@
 'use client';
 
-import { useEffect, useRef, useState, type CSSProperties } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState, type CSSProperties } from 'react';
+import { createPortal } from 'react-dom';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { useIsMobile } from '@/hooks/useIsMobile';
+import MobileDropdownBackdrop from '@/components/MobileDropdownBackdrop';
+import { cn } from '@/lib/utils';
 
 interface DatePickerPopoverProps {
   selectedDate: string | null;
@@ -59,39 +63,63 @@ export default function DatePickerPopover({
   anchorRef,
 }: DatePickerPopoverProps) {
   const popoverRef = useRef<HTMLDivElement>(null);
+  const isMobile = useIsMobile();
+  const [mounted, setMounted] = useState(false);
   const [position, setPosition] = useState<{ top: number; left: number } | null>(null);
 
   const initialDate = parseDateString(selectedDate) || new Date();
   const [viewYear, setViewYear] = useState<number>(initialDate.getFullYear());
   const [viewMonth, setViewMonth] = useState<number>(initialDate.getMonth());
 
-  useEffect(() => {
-    // Use the passed anchorRef (trigger button) to position the popover
+  useLayoutEffect(() => {
+    setMounted(true);
+  }, []);
+
+  useLayoutEffect(() => {
     const anchor = anchorRef?.current;
+    if (isMobile) {
+      setPosition(null);
+      return;
+    }
+
     if (anchor) {
       const rect = anchor.getBoundingClientRect();
+      const panelWidth = 220;
+      const panelHeight = 260;
       setPosition({
-        top: Math.min(rect.bottom + 6, window.innerHeight - 270),
-        left: Math.max(8, Math.min(rect.left + rect.width / 2 - 100, window.innerWidth - 216)),
+        top: Math.min(rect.bottom + 6, window.innerHeight - panelHeight - 12),
+        left: Math.max(12, Math.min(rect.left + rect.width / 2 - panelWidth / 2, window.innerWidth - panelWidth - 12)),
       });
     }
-    const handleMouseDown = (e: MouseEvent) => {
-      if (popoverRef.current && !popoverRef.current.contains(e.target as Node)) {
-        onClose();
-      }
+  }, [anchorRef, isMobile]);
+
+  useEffect(() => {
+    const handlePointerDown = (e: PointerEvent) => {
+      if (popoverRef.current?.contains(e.target as Node)) return;
+      if (anchorRef?.current?.contains(e.target as Node)) return;
+      if (isMobile) return;
+      onClose();
     };
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') {
-        onClose();
-      }
+      if (e.key === 'Escape') onClose();
     };
-    document.addEventListener('mousedown', handleMouseDown);
+
+    document.addEventListener('pointerdown', handlePointerDown);
     document.addEventListener('keydown', handleKeyDown);
     return () => {
-      document.removeEventListener('mousedown', handleMouseDown);
+      document.removeEventListener('pointerdown', handlePointerDown);
       document.removeEventListener('keydown', handleKeyDown);
     };
-  }, [onClose]);
+  }, [anchorRef, isMobile, onClose]);
+
+  useEffect(() => {
+    if (!isMobile) return;
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.body.style.overflow = previousOverflow;
+    };
+  }, [isMobile]);
 
   const handlePrevMonth = () => {
     if (viewMonth === 0) {
@@ -113,7 +141,7 @@ export default function DatePickerPopover({
 
   const monthName = new Date(viewYear, viewMonth, 1).toLocaleString('en-US', { month: 'long' });
 
-  const firstDayOfMonth = new Date(viewYear, viewMonth, 1).getDay(); // 0 = Sunday
+  const firstDayOfMonth = new Date(viewYear, viewMonth, 1).getDay();
   const daysInCurrentMonth = new Date(viewYear, viewMonth + 1, 0).getDate();
   const daysInPrevMonth = new Date(viewYear, viewMonth, 0).getDate();
 
@@ -125,7 +153,6 @@ export default function DatePickerPopover({
     dateStr: string;
   }> = [];
 
-  // Leading days from previous month
   for (let i = firstDayOfMonth - 1; i >= 0; i--) {
     const dayNum = daysInPrevMonth - i;
     const prevM = viewMonth === 0 ? 11 : viewMonth - 1;
@@ -140,7 +167,6 @@ export default function DatePickerPopover({
     });
   }
 
-  // Current month days
   for (let i = 1; i <= daysInCurrentMonth; i++) {
     const d = new Date(viewYear, viewMonth, i);
     days.push({
@@ -152,7 +178,6 @@ export default function DatePickerPopover({
     });
   }
 
-  // Trailing days for next month
   const totalCells = days.length <= 35 && days.length + (7 - (days.length % 7 || 7)) <= 35 ? 35 : 42;
   const neededTrailing = totalCells - days.length;
 
@@ -173,21 +198,28 @@ export default function DatePickerPopover({
   const parsedSelected = parseDateString(selectedDate);
   const selectedDateStr = parsedSelected ? formatDateToYYYYMMDD(parsedSelected) : null;
 
-  return (
+  if (!mounted) return null;
+
+  const panel = (
     <div
-      className="calendar-popover fixed z-[9999]"
-      style={position ? ({ top: `${position.top}px`, left: `${position.left}px` } as CSSProperties) : { top: '-9999px', left: '-9999px' }}
+      className={cn('calendar-popover fixed z-[9999]', isMobile && 'calendar-popover--mobile')}
+      style={
+        !isMobile && position
+          ? ({ top: `${position.top}px`, left: `${position.left}px` } as CSSProperties)
+          : undefined
+      }
     >
       <div
         ref={popoverRef}
-        className="w-[220px] h-[260px] max-w-[calc(100vw-1.5rem)] max-h-[calc(100vh-1.5rem)] overflow-hidden bg-white dark:bg-gray-900 border border-gray-200/80 dark:border-gray-800 rounded-md shadow-[0_12px_36px_rgba(0,0,0,0.12)] dark:shadow-[0_12px_36px_rgba(0,0,0,0.4)] p-3 select-none flex flex-col gap-3"
+        className="calendar-popover__panel bg-white dark:bg-gray-900 border border-gray-200/80 dark:border-gray-800 rounded-xl shadow-[0_12px_36px_rgba(0,0,0,0.12)] dark:shadow-[0_12px_36px_rgba(0,0,0,0.4)] p-3 select-none flex flex-col gap-3"
+        role="dialog"
+        aria-label="Choose date"
       >
-        {/* Header row */}
         <div className="flex items-center justify-between px-1">
           <button
             type="button"
             onClick={handlePrevMonth}
-            className="p-1 text-gray-500 dark:text-gray-400 hover:text-gray-900 hover:bg-gray-100 dark:hover:text-gray-100 dark:hover:bg-gray-800 rounded-md transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent-color)]"
+            className="calendar-popover__nav-btn p-1 text-gray-500 dark:text-gray-400 hover:text-gray-900 hover:bg-gray-100 dark:hover:text-gray-100 dark:hover:bg-gray-800 rounded-md transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent-color)]"
             aria-label="Previous month"
           >
             <ChevronLeft size={16} strokeWidth={1.75} />
@@ -198,14 +230,13 @@ export default function DatePickerPopover({
           <button
             type="button"
             onClick={handleNextMonth}
-            className="p-1 text-gray-500 dark:text-gray-400 hover:text-gray-900 hover:bg-gray-100 dark:hover:text-gray-100 dark:hover:bg-gray-800 rounded-md transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent-color)]"
+            className="calendar-popover__nav-btn p-1 text-gray-500 dark:text-gray-400 hover:text-gray-900 hover:bg-gray-100 dark:hover:text-gray-100 dark:hover:bg-gray-800 rounded-md transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent-color)]"
             aria-label="Next month"
           >
             <ChevronRight size={16} strokeWidth={1.75} />
           </button>
         </div>
 
-        {/* Weekday headers */}
         <div className="grid grid-cols-7 text-center">
           {['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'].map((day) => (
             <span key={day} className="text-[11px] font-normal text-gray-500 dark:text-gray-400">
@@ -214,14 +245,13 @@ export default function DatePickerPopover({
           ))}
         </div>
 
-        {/* Days grid */}
-        <div className="grid grid-cols-7 gap-y-1.5 justify-items-center flex-1 content-between">
+        <div className="calendar-popover__days grid grid-cols-7 gap-y-1.5 justify-items-center flex-1 content-between">
           {days.map((item, index) => {
             const isSelected = selectedDateStr === item.dateStr;
             const isToday = todayStr === item.dateStr;
 
             let dayClass =
-              'w-7 h-7 text-[12px] flex items-center justify-center rounded-full transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black/20 dark:focus-visible:ring-white/20';
+              'calendar-popover__day text-[12px] flex items-center justify-center rounded-full transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black/20 dark:focus-visible:ring-white/20';
 
             if (isSelected) {
               dayClass += ' bg-black text-white font-medium dark:bg-white dark:text-black';
@@ -254,6 +284,13 @@ export default function DatePickerPopover({
         </div>
       </div>
     </div>
+  );
 
+  return createPortal(
+    <>
+      {isMobile && <MobileDropdownBackdrop onClose={onClose} />}
+      {panel}
+    </>,
+    document.body,
   );
 }

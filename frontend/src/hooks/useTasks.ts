@@ -1,7 +1,8 @@
 'use client';
 
 import { useCallback, useEffect, useState } from 'react';
-import { apiFetch, guestLogin } from '@/lib/api';
+import { apiFetch } from '@/lib/api';
+import { readTasksList, writeTasksList, patchCachedTask } from '@/lib/client-cache';
 
 export interface Task {
   _id: string;
@@ -35,26 +36,52 @@ export interface Task {
 export const STATUSES = ['To Do', 'Doing', 'Completed', 'On Hold'] as const;
 export type Status = (typeof STATUSES)[number];
 
-async function ensureAuth() {
-  if (!localStorage.getItem('tms-token')) await guestLogin();
+function isTempId(id: string) {
+  return id.startsWith('tmp-');
 }
 
 export function useTasks(projectId?: string) {
-  const [tasks, setTasks] = useState<Task[]>([]);
+  const [tasks, setTasks] = useState<Task[]>(() => readTasksList(projectId) ?? []);
+  const [loading, setLoading] = useState(() => !readTasksList(projectId));
+  const [refreshing, setRefreshing] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const refetch = useCallback((options?: { background?: boolean }) => {
+    const background = options?.background ?? Boolean(readTasksList(projectId));
+    if (background) setRefreshing(true);
+    else {
+      setLoading(true);
+      setError(null);
+    }
+
+    return apiFetch(projectId ? `/tasks?projectId=${projectId}` : '/tasks')
+      .then((data: Task[]) => {
+        writeTasksList(projectId, data);
+        setTasks(data);
+        setError(null);
+      })
+      .catch((err: Error) => {
+        console.error(err);
+        if (!background) {
+          setError(err.message || 'Failed to load tasks');
+        }
+      })
+      .finally(() => {
+        setLoading(false);
+        setRefreshing(false);
+      });
+  }, [projectId]);
 
   useEffect(() => {
-    ensureAuth()
-      .then(() => apiFetch(projectId ? `/tasks?projectId=${projectId}` : '/tasks'))
-      .then(setTasks)
-      .catch(console.error);
-  }, [projectId]);
-
-  const refetch = useCallback(() => {
-    return ensureAuth()
-      .then(() => apiFetch(projectId ? `/tasks?projectId=${projectId}` : '/tasks'))
-      .then(setTasks)
-      .catch(console.error);
-  }, [projectId]);
+    const initial = readTasksList(projectId);
+    if (initial) {
+      setTasks(initial);
+      setLoading(false);
+      refetch({ background: true });
+      return;
+    }
+    refetch();
+  }, [projectId, refetch]);
 
   const tasksByColumn = Object.fromEntries(
     STATUSES.map((s) => [s, tasks.filter((t) => t.status === s)]),
@@ -62,29 +89,87 @@ export function useTasks(projectId?: string) {
 
   const createTask = useCallback(async (title: string, status: Status = 'To Do') => {
     const optimistic: Task = { _id: `tmp-${Date.now()}`, title, status, tags: [], projectId };
-    setTasks((prev) => [optimistic, ...prev]);
+    setTasks((prev) => {
+      const next = [optimistic, ...prev];
+      writeTasksList(projectId, next);
+      return next;
+    });
     try {
       const created = await apiFetch('/tasks', {
         method: 'POST',
         body: JSON.stringify({ title, status, projectId }),
       });
-      setTasks((prev) => prev.map((t) => (t._id === optimistic._id ? created : t)));
+      setTasks((prev) => {
+        const next = prev.map((t) => (t._id === optimistic._id ? created : t));
+        writeTasksList(projectId, next);
+        return next;
+      });
     } catch {
-      setTasks((prev) => prev.filter((t) => t._id !== optimistic._id));
+      setTasks((prev) => {
+        const next = prev.filter((t) => t._id !== optimistic._id);
+        writeTasksList(projectId, next);
+        return next;
+      });
     }
   }, [projectId]);
 
   const updateTask = useCallback(async (id: string, partialFields: Partial<Task>) => {
-    setTasks((prev) => prev.map((t) => (t._id === id ? { ...t, ...partialFields } : t)));
+    if (isTempId(id)) return;
+    setTasks((prev) => {
+      const next = prev.map((t) => (t._id === id ? { ...t, ...partialFields } : t));
+      writeTasksList(projectId, next);
+      patchCachedTask(id, partialFields);
+      return next;
+    });
     try {
       await apiFetch(`/tasks/${id}`, { method: 'PATCH', body: JSON.stringify(partialFields) });
     } catch {
-      // revert on failure — refetch
-      apiFetch(projectId ? `/tasks?projectId=${projectId}` : '/tasks')
-        .then(setTasks)
-        .catch(console.error);
+      refetch({ background: true });
     }
-  }, [projectId]);
+  }, [projectId, refetch]);
 
-  return { tasks, tasksByColumn, createTask, updateTask, refetch };
+  const removeTask = useCallback(async (id: string) => {
+    if (isTempId(id)) return;
+    const snapshot = tasks;
+    setTasks((prev) => {
+      const next = prev.filter((t) => t._id !== id);
+      writeTasksList(projectId, next);
+      return next;
+    });
+    try {
+      await apiFetch(`/tasks/${id}`, { method: 'DELETE' });
+    } catch {
+      setTasks(snapshot);
+      writeTasksList(projectId, snapshot);
+    }
+  }, [projectId, tasks]);
+
+  const duplicateTask = useCallback(async (task: Task) => {
+    await apiFetch('/tasks', {
+      method: 'POST',
+      body: JSON.stringify({
+        title: `${task.title} (copy)`,
+        status: task.status,
+        projectId: task.projectId,
+        priority: task.priority,
+        assignee: task.assignee,
+        tags: task.tags,
+        team: task.team,
+      }),
+    });
+    await refetch({ background: true });
+  }, [refetch]);
+
+  return {
+    tasks,
+    tasksByColumn,
+    loading,
+    refreshing,
+    error,
+    createTask,
+    updateTask,
+    removeTask,
+    duplicateTask,
+    refetch,
+  };
 }

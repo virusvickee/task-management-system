@@ -6,7 +6,7 @@ import {
   useRef,
   useState,
 } from 'react';
-import { Search } from 'lucide-react';
+import { Search, X } from 'lucide-react';
 
 export interface ToolbarSearchInputHandle {
   open: () => void;
@@ -22,7 +22,7 @@ export interface ToolbarSearchInputProps {
 
 function SearchShortcutKbd() {
   return (
-    <kbd className="dashboard-toolbar-search-kbd" aria-hidden="true">
+    <kbd className="dashboard-toolbar-search-kbd hidden sm:inline-flex" aria-hidden="true">
       ⌘F
     </kbd>
   );
@@ -81,7 +81,9 @@ const ToolbarSearchInput = forwardRef<ToolbarSearchInputHandle, ToolbarSearchInp
         />
         <input
           ref={inputRef}
-          type="search"
+          type="text"
+          inputMode="search"
+          enterKeyHint="search"
           value={value}
           onChange={(e) => onChange(e.target.value)}
           onKeyDown={(e) => {
@@ -97,6 +99,20 @@ const ToolbarSearchInput = forwardRef<ToolbarSearchInputHandle, ToolbarSearchInp
           aria-label={ariaLabel ?? placeholder}
           className="dashboard-toolbar-search-input"
         />
+        {value.trim().length > 0 && (
+          <button
+            type="button"
+            className="dashboard-toolbar-search-clear"
+            onMouseDown={(e) => e.preventDefault()}
+            onClick={() => {
+              onChange('');
+              inputRef.current?.focus();
+            }}
+            aria-label="Clear search"
+          >
+            <X size={14} strokeWidth={1.75} />
+          </button>
+        )}
         <SearchShortcutKbd />
       </label>
     );

@@ -13,6 +13,7 @@ import { JwtStrategyGuard } from '../auth/jwt.guard';
 import { ProjectsService } from './projects.service';
 import { CreateProjectDto } from './dto/create-project.dto';
 import { UpdateProjectDto } from './dto/update-project.dto';
+import { ParseMongoIdPipe } from '../common/pipes/parse-mongo-id.pipe';
 
 @Controller('projects')
 @UseGuards(JwtStrategyGuard)
@@ -30,17 +31,17 @@ export class ProjectsController {
   }
 
   @Get(':id')
-  findOne(@Req() req: any, @Param('id') id: string) {
+  findOne(@Req() req: any, @Param('id', ParseMongoIdPipe) id: string) {
     return this.projectsService.findOne(req.user.sub, id);
   }
 
   @Patch(':id')
-  update(@Req() req: any, @Param('id') id: string, @Body() dto: UpdateProjectDto) {
+  update(@Req() req: any, @Param('id', ParseMongoIdPipe) id: string, @Body() dto: UpdateProjectDto) {
     return this.projectsService.update(req.user.sub, id, dto);
   }
 
   @Delete(':id')
-  remove(@Req() req: any, @Param('id') id: string) {
+  remove(@Req() req: any, @Param('id', ParseMongoIdPipe) id: string) {
     return this.projectsService.remove(req.user.sub, id);
   }
 }

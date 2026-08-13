@@ -3,6 +3,7 @@ import './globals.css';
 import { ThemeProvider } from '@/context/theme-context';
 import { ThemeApplier } from '@/context/theme-applier';
 import { SidebarProvider } from '@/context/sidebar-context';
+import ToastProvider from '@/components/ToastProvider';
 
 export const metadata: Metadata = {
   title: 'Task Management System',
@@ -63,7 +64,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body>
         <ThemeProvider>
           <ThemeApplier />
-          <SidebarProvider>{children}</SidebarProvider>
+          <SidebarProvider>
+            {children}
+            <ToastProvider />
+          </SidebarProvider>
         </ThemeProvider>
       </body>
     </html>

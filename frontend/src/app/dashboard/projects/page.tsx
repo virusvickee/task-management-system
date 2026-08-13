@@ -11,6 +11,7 @@ import FilterDropdown, { EMPTY_FILTERS } from '@/components/FilterDropdown';
 import type { TaskFilters } from '@/components/FilterDropdown';
 import ProjectsTable from '@/components/ProjectsTable';
 import ToolbarSearchInput, { type ToolbarSearchInputHandle } from '@/components/ToolbarSearchInput';
+import MobileUserMenu from '@/components/MobileUserMenu';
 import { useSidebar } from '@/context/sidebar-context';
 
 function matchesProjectFilters(
@@ -39,7 +40,6 @@ export default function ProjectsPage() {
   const { sidebarOpen, setSidebarOpen } = useSidebar();
   const { projects, loading, createProject, updateProject, deleteProject } = useProjects();
   const [query, setQuery] = useState('');
-  const [view, setView] = useState<'Board' | 'List'>('List');
   const [filters, setFilters] = useState<TaskFilters>(EMPTY_FILTERS);
   const [fields, setFields] = useState({
     priority: true,
@@ -70,8 +70,8 @@ export default function ProjectsPage() {
   );
 
   return (
-    <div className="flex flex-col flex-1 min-w-0 overflow-hidden bg-[var(--background)] text-[var(--foreground)] dashboard-page-root">
-      <header className="dashboard-top-header">
+    <div className="flex flex-col flex-1 min-w-0 min-h-0 bg-[var(--background)] text-[var(--foreground)] dashboard-page-root">
+      <header className="dashboard-top-header hidden lg:block">
         <div className="dashboard-top-header-inner">
           <button
             type="button"
@@ -79,16 +79,16 @@ export default function ProjectsPage() {
             className="dashboard-sidebar-toggle-btn"
             aria-label="Toggle sidebar"
           >
-            <PanelLeft size={16} strokeWidth={1.75} />
+            <PanelLeft size={16} strokeWidth={2.5} />
           </button>
           <div className="dashboard-top-header-divider" aria-hidden="true" />
         </div>
       </header>
 
       <div className="flex-1 overflow-y-auto bg-[var(--background)]">
-        <div className="dashboard-page-shell dashboard-page-content">
+        <div className="dashboard-page-shell dashboard-page-shell--sticky dashboard-page-content">
           <div className="dashboard-page-toolbar shrink-0">
-            <div className="flex items-center gap-2 min-w-0 min-h-8">
+            <div className="dashboard-page-toolbar-title hidden lg:flex items-center gap-2 min-w-0 min-h-8">
               <h1 className="dashboard-page-title truncate">Projects</h1>
               {hasActiveFilters && (
                 <span className="dashboard-page-meta">
@@ -105,10 +105,9 @@ export default function ProjectsPage() {
                 aria-label="Search projects"
               />
               <FieldsDropdown
-                view={view}
-                onViewChange={setView}
                 fields={fields}
                 onFieldsChange={(f) => setFields(f as typeof fields)}
+                showViewToggle={false}
               />
               <FilterDropdown filters={filters} onFiltersChange={setFilters} ariaLabel="Filter projects" />
               <button
@@ -119,6 +118,19 @@ export default function ProjectsPage() {
                 <Plus size={14} strokeWidth={2} className="dashboard-toolbar-icon shrink-0" />
                 <span className="dashboard-toolbar-add-task-label">Add Task</span>
               </button>
+            </div>
+
+            <MobileUserMenu className="dashboard-page-toolbar-avatar" />
+          </div>
+
+          <div className="dashboard-page-heading lg:hidden shrink-0">
+            <div className="flex items-center gap-2 min-w-0">
+              <h1 className="dashboard-page-title truncate">Projects</h1>
+              {hasActiveFilters && (
+                <span className="dashboard-page-meta">
+                  {filtered.length} results
+                </span>
+              )}
             </div>
           </div>
 

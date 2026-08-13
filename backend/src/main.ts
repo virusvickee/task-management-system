@@ -2,11 +2,16 @@ import 'dotenv/config';
 import { NestFactory } from '@nestjs/core';
 import { ValidationPipe } from '@nestjs/common';
 import { AppModule } from './app.module';
+import { MongoExceptionFilter } from './common/filters/mongo-exception.filter';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
-
   const isProd = process.env.NODE_ENV === 'production';
+
+  if (isProd && !process.env.JWT_SECRET) {
+    throw new Error('JWT_SECRET must be set in production');
+  }
+
+  const app = await NestFactory.create(AppModule);
 
   // In production, CORS_ORIGIN must be set — no silent localhost fallback.
   // In development, localhost ports are allowed for convenience.
@@ -38,6 +43,8 @@ async function bootstrap() {
       transform: true,
     }),
   );
+
+  app.useGlobalFilters(new MongoExceptionFilter());
 
   app.setGlobalPrefix('api');
 

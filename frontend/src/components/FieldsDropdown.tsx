@@ -1,7 +1,11 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { Check, LayoutGrid, List } from 'lucide-react';
+import { useFixedDropdownStyle } from '@/hooks/useFixedDropdown';
+import { useIsMobile } from '@/hooks/useIsMobile';
+import MobileDropdownBackdrop from '@/components/MobileDropdownBackdrop';
 
 const FIELD_OPTIONS: { key: string; label: string }[] = [
   { key: 'priority', label: 'Priority' },
@@ -13,31 +17,48 @@ const FIELD_OPTIONS: { key: string; label: string }[] = [
 ];
 
 interface Props {
-  view: 'List' | 'Board';
-  onViewChange: (v: 'List' | 'Board') => void;
+  view?: 'List' | 'Board';
+  onViewChange?: (v: 'List' | 'Board') => void;
   fields: Record<string, boolean>;
   onFieldsChange: (f: Record<string, boolean>) => void;
+  showViewToggle?: boolean;
 }
 
 export default function FieldsDropdown({
-  view,
+  view = 'List',
   onViewChange,
   fields,
   onFieldsChange,
+  showViewToggle = true,
 }: Props) {
   const [open, setOpen] = useState(false);
+  const isMobile = useIsMobile();
   const ref = useRef<HTMLDivElement>(null);
+  const panelRef = useRef<HTMLDivElement>(null);
+  const panelStyle = useFixedDropdownStyle(open, ref, isMobile ? 300 : 220);
+
+  const closeDropdown = () => setOpen(false);
 
   useEffect(() => {
     if (!open) return;
-    function handler(e: MouseEvent) {
-      if (ref.current && !ref.current.contains(e.target as Node)) {
-        setOpen(false);
-      }
+    function handler(e: PointerEvent) {
+      const target = e.target as Node;
+      if (ref.current?.contains(target)) return;
+      if (panelRef.current?.contains(target)) return;
+      closeDropdown();
     }
-    document.addEventListener('mousedown', handler);
-    return () => document.removeEventListener('mousedown', handler);
+    document.addEventListener('pointerdown', handler);
+    return () => document.removeEventListener('pointerdown', handler);
   }, [open]);
+
+  useEffect(() => {
+    if (!open || !isMobile) return;
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.body.style.overflow = previousOverflow;
+    };
+  }, [open, isMobile]);
 
   function toggleField(key: string) {
     onFieldsChange({ ...fields, [key]: !fields[key] });
@@ -84,23 +105,32 @@ export default function FieldsDropdown({
         <span className="dashboard-toolbar-fields-label shrink-0">Fields</span>
       </button>
 
-      {open && (
-        <div className="fields-dropdown-panel absolute right-0 top-full mt-1.5 w-[220px] rounded-xl shadow-lg z-[9999] py-2 select-none">
-          <div className="fields-dropdown-segment mx-2 mb-2 p-0.5 rounded-lg flex">
-            {(['List', 'Board'] as const).map((t) => (
-              <button
-                key={t}
-                type="button"
-                onClick={() => onViewChange(t)}
-                className={`fields-dropdown-view-btn flex-1 flex items-center justify-center gap-1.5 py-1.5 rounded-md text-[12px] font-medium transition-all${view === t ? ' fields-dropdown-view-btn--active' : ''}`}
-              >
-                {t === 'List' ? <List size={12} /> : <LayoutGrid size={12} />}
-                {t}
-              </button>
-            ))}
-          </div>
-
-          <div className="fields-dropdown-divider mx-2 mb-1" />
+      {open && typeof document !== 'undefined' && createPortal(
+        <>
+          {isMobile && <MobileDropdownBackdrop onClose={closeDropdown} />}
+          <div
+            ref={panelRef}
+            className="fields-dropdown-panel toolbar-dropdown-panel app-toolbar-dropdown rounded-xl shadow-lg py-2 select-none"
+            style={panelStyle}
+          >
+          {showViewToggle && onViewChange && (
+            <>
+              <div className="fields-dropdown-segment mx-2 mb-2 p-0.5 rounded-lg flex">
+                {(['List', 'Board'] as const).map((t) => (
+                  <button
+                    key={t}
+                    type="button"
+                    onClick={() => onViewChange(t)}
+                    className={`fields-dropdown-view-btn flex-1 flex items-center justify-center gap-1.5 py-1.5 rounded-md text-[12px] font-medium transition-all${view === t ? ' fields-dropdown-view-btn--active' : ''}`}
+                  >
+                    {t === 'List' ? <List size={12} /> : <LayoutGrid size={12} />}
+                    {t}
+                  </button>
+                ))}
+              </div>
+              <div className="fields-dropdown-divider mx-2 mb-1" />
+            </>
+          )}
 
           {FIELD_OPTIONS.map(({ key, label }) => {
             const checked = Boolean(fields[key]);
@@ -109,7 +139,7 @@ export default function FieldsDropdown({
                 key={key}
                 type="button"
                 onClick={() => toggleField(key)}
-                className="fields-dropdown-item w-full flex items-center justify-between gap-3 px-3 py-[9px] transition-colors"
+                className="fields-dropdown-item app-dropdown-item w-full flex items-center justify-between gap-3 px-3 py-[9px] transition-colors"
               >
                 <span className="text-[13px]">{label}</span>
                 <span
@@ -122,6 +152,8 @@ export default function FieldsDropdown({
             );
           })}
         </div>
+        </>,
+        document.body,
       )}
     </div>
   );

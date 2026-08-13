@@ -4,25 +4,15 @@ import { useEffect, useState } from 'react';
 import { Check, Plus } from 'lucide-react';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { apiFetch } from '@/lib/api';
+import { MEMBER_OPTIONS } from '@/lib/members';
+import { avatarColor, avatarInitials, avatarSizeClass } from '@/lib/avatar';
 
-const ALL_MEMBERS = ['Alex Kim', 'Sam Lee', 'Morgan Chen', 'Jordan Park'];
-
-export { ALL_MEMBERS };
-
-const AVATAR_COLORS = [
-  'bg-violet-500', 'bg-emerald-500', 'bg-orange-500', 'bg-pink-500', 'bg-blue-500',
-];
-function avatarColor(name: string) {
-  let h = 0;
-  for (let i = 0; i < name.length; i++) h = (h * 31 + name.charCodeAt(i)) >>> 0;
-  return AVATAR_COLORS[h % AVATAR_COLORS.length];
-}
+export { MEMBER_OPTIONS as ALL_MEMBERS };
 
 function Avatar({ name, size = 6 }: { name: string; size?: number }) {
-  const initials = name.split(' ').map((p) => p[0]).join('').slice(0, 2).toUpperCase();
   return (
-    <span className={`w-${size} h-${size} rounded-full ${avatarColor(name)} flex items-center justify-center text-white text-[10px] font-semibold shrink-0`}>
-      {initials}
+    <span className={`${avatarSizeClass(size)} rounded-full ${avatarColor(name)} flex items-center justify-center text-white text-[10px] font-semibold shrink-0`}>
+      {avatarInitials(name)}
     </span>
   );
 }
@@ -45,12 +35,13 @@ export default function AssignMemberPopover({ taskId, currentMembers = [], onMem
   }, [currentMembers]);
 
   async function toggleMember(member: string) {
+    const previous = members;
     const newMembers = members.includes(member)
       ? members.filter((m) => m !== member)
       : [...members, member];
-    
+
     setMembers(newMembers);
-    if (onMembersChange) onMembersChange(newMembers);
+    onMembersChange?.(newMembers);
 
     try {
       if (onUpdate) {
@@ -63,9 +54,8 @@ export default function AssignMemberPopover({ taskId, currentMembers = [], onMem
       }
     } catch (e) {
       console.error(e);
-      // Revert on failure
-      setMembers(members);
-      if (onMembersChange) onMembersChange(members);
+      setMembers(previous);
+      onMembersChange?.(previous);
     }
   }
 
@@ -80,16 +70,16 @@ export default function AssignMemberPopover({ taskId, currentMembers = [], onMem
       <PopoverTrigger asChild>
         <span className={disabled ? 'pointer-events-none opacity-45' : undefined}>{trigger || defaultTrigger}</span>
       </PopoverTrigger>
-      <PopoverContent className="w-48 p-1" align="start">
+      <PopoverContent className="w-[min(12rem,calc(100vw-24px))] p-1" align="start">
         <div className="flex flex-col">
-          {ALL_MEMBERS.map((member) => (
+          {MEMBER_OPTIONS.map((member) => (
             <button
               key={member}
               onClick={(e) => {
                 e.stopPropagation();
                 toggleMember(member);
               }}
-              className="flex items-center justify-between px-2 py-1.5 text-sm rounded-sm hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent-color)]"
+              className="app-dropdown-item flex items-center justify-between px-2 py-1.5 text-sm rounded-sm hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent-color)]"
             >
               <div className="flex items-center gap-2">
                 <Avatar name={member} size={5} />

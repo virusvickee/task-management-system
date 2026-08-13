@@ -5,7 +5,9 @@ import Link from 'next/link';
 import { ArrowLeft, Search, User, Sun, Square, Pencil, Check, Moon } from 'lucide-react';
 import { useTheme, ACCENT_COLORS, DEFAULT_ACCENT, DEFAULT_THEME } from '@/context/theme-context';
 import type { AccentColor } from '@/context/theme-context';
-import { apiFetch, guestLogin, logout } from '@/lib/api';
+import { apiFetch, logout } from '@/lib/api';
+import MobileUserMenu from '@/components/MobileUserMenu';
+import { toastConfirm } from '@/lib/toast';
 
 type Section = 'profile' | 'theme' | 'color';
 
@@ -24,8 +26,8 @@ interface UserProfile {
 
 function ProfileSection() {
   const [profile, setProfile] = useState<UserProfile>({
-    name: 'Dexter',
-    email: 'dexter@gmail.com',
+    name: 'Guest',
+    email: '',
     title: '',
     username: '',
   });
@@ -34,12 +36,11 @@ function ProfileSection() {
   useEffect(() => {
     async function loadProfile() {
       try {
-        if (!localStorage.getItem('tms-token')) await guestLogin();
         const data = await apiFetch('/users/me');
         if (data) {
           setProfile({
-            name: data.name || 'Dexter',
-            email: data.email || 'dexter@gmail.com',
+            name: data.name || 'Guest',
+            email: data.email || '',
             title: data.title || '',
             username: data.username || '',
           });
@@ -70,9 +71,12 @@ function ProfileSection() {
   };
 
   const handleLeaveWorkspace = () => {
-    if (confirm('Are you sure you want to leave? This will end your guest session.')) {
-      logout();
-    }
+    toastConfirm({
+      title: 'Leave workspace?',
+      message: 'This will end your guest session.',
+      confirmLabel: 'Leave',
+      onConfirm: () => logout(),
+    });
   };
 
   return (
@@ -98,7 +102,7 @@ function ProfileSection() {
             <div className="flex items-center justify-between px-5 py-4">
               <span className="text-[13px] text-gray-700 dark:text-gray-300 font-medium">Email</span>
               <div className="flex items-center gap-2">
-                <span className="text-[13px] text-gray-500 dark:text-gray-400 truncate max-w-[160px] sm:max-w-none">{profile.email || 'dexter@gmail.com'}</span>
+                <span className="text-[13px] text-gray-500 dark:text-gray-400 truncate max-w-[160px] sm:max-w-none">{profile.email || '—'}</span>
                 <button className="p-1 rounded hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors shrink-0" title="Read only">
                   <Pencil size={13} className="text-gray-400 opacity-60" />
                 </button>
@@ -261,7 +265,12 @@ export default function SettingsPage() {
   const filtered = NAV.filter((n) => n.label.toLowerCase().includes(search.toLowerCase()));
 
   return (
-    <div className="flex flex-col md:flex-row h-screen bg-[var(--background)] text-[var(--foreground)] overflow-hidden w-full">
+    <div className="flex flex-col md:flex-row flex-1 min-h-0 overflow-hidden w-full bg-[var(--background)] text-[var(--foreground)]">
+      <div className="dashboard-mobile-unified-header lg:hidden shrink-0">
+        <h1 className="dashboard-page-title">Settings</h1>
+        <MobileUserMenu />
+      </div>
+
       {/* ── Settings sidebar / tab bar ── */}
       <aside className="settings-sidebar w-full md:w-[220px] shrink-0
                         border-b md:border-b-0 md:border-r border-[color:var(--base-border)]

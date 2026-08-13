@@ -3,7 +3,6 @@
 import { MoreHorizontal, Tag } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import type { Task } from '@/hooks/useTasks';
-import { apiFetch } from '@/lib/api';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -11,6 +10,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import DateBadgeDestructive from './ui/DateBadgeDestructive';
+import { toastConfirm, toastSuccess } from '@/lib/toast';
 
 const AVATAR_GRADIENTS = [
   'from-violet-400 to-purple-600',
@@ -40,14 +40,19 @@ export default function TaskCard({
   cardBg,
   textColor,
   borderColor,
+  onDeleteTask,
+  onDuplicateTask,
 }: {
   task: Task;
   fields: Record<string, boolean>;
   cardBg?: string;
   textColor?: string;
   borderColor?: string;
+  onDeleteTask?: (taskId: string) => Promise<void>;
+  onDuplicateTask?: (task: Task) => Promise<void>;
 }) {
   const router = useRouter();
+  const href = `/dashboard/tasks/${task._id}`;
   const useThemeClasses = cardBg === undefined;
   const bg = cardBg ?? 'var(--card-bg)';
   const tc = textColor ?? 'var(--base-primary)';
@@ -58,27 +63,24 @@ export default function TaskCard({
     e.dataTransfer.effectAllowed = 'move';
   }
 
-  async function handleDelete(e: React.MouseEvent) {
+  function handleDelete(e: React.MouseEvent) {
     e.stopPropagation();
-    if (confirm('Delete this task?')) {
-      await apiFetch(`/tasks/${task._id}`, { method: 'DELETE' });
-      window.location.reload();
-    }
+    if (!onDeleteTask) return;
+    toastConfirm({
+      title: 'Delete task?',
+      message: 'This task will be permanently removed.',
+      confirmLabel: 'Delete',
+      onConfirm: async () => {
+        await onDeleteTask(task._id);
+        toastSuccess('Task deleted');
+      },
+    });
   }
 
   async function handleDuplicate(e: React.MouseEvent) {
     e.stopPropagation();
-    await apiFetch('/tasks', {
-      method: 'POST',
-      body: JSON.stringify({
-        title: `${task.title} (copy)`,
-        status: task.status,
-        projectId: task.projectId,
-        priority: task.priority,
-        assignee: task.assignee,
-      }),
-    });
-    window.location.reload();
+    if (!onDuplicateTask) return;
+    await onDuplicateTask(task);
   }
 
   const dueDateFormatted = task.dueDate
@@ -92,7 +94,8 @@ export default function TaskCard({
     <div
       draggable
       onDragStart={handleDragStart}
-      onClick={() => router.push(`/dashboard/tasks/${task._id}`)}
+      onMouseEnter={() => router.prefetch(href)}
+      onClick={() => router.push(href)}
       className={`group hover:shadow-md transition-all duration-150 cursor-pointer${useThemeClasses ? ' kanban-task-card' : ''}`}
       style={{
         width: '273px',
@@ -125,7 +128,7 @@ export default function TaskCard({
             <DropdownMenuItem
               onClick={(e) => {
                 e.stopPropagation();
-                router.push(`/dashboard/tasks/${task._id}`);
+                router.push(href);
               }}
             >
               Edit

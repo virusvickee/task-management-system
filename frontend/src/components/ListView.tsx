@@ -4,7 +4,7 @@ import { useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { ChevronDown, ChevronRight, MoreHorizontal, Plus, SignalLow } from 'lucide-react';
 import type { Task, Status } from '@/hooks/useTasks';
-import { apiFetch } from '@/lib/api';
+import { getStoredUserName } from '@/lib/api';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -12,6 +12,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import AssignMemberPopover from './AssignMemberPopover';
+import { toastConfirm, toastSuccess } from '@/lib/toast';
 
 /* ── Avatar ── */
 function Avatar({ name }: { name: string }) {
@@ -42,13 +43,16 @@ function Priority({ value }: { value?: string }) {
 
 /* ── Status section ── */
 function StatusSection({
-  status, tasks, onAddTask, searching, fields,
+  status, tasks, onAddTask, searching, fields, onDeleteTask, onDuplicateTask, onMembersChange,
 }: {
   status: Status;
   tasks: Task[];
   onAddTask: (title: string, status: Status) => void;
   searching: boolean;
   fields: Record<string, boolean>;
+  onDeleteTask: (taskId: string) => Promise<void>;
+  onDuplicateTask: (task: Task) => Promise<void>;
+  onMembersChange: () => void;
 }) {
   const router = useRouter();
   const [collapsed, setCollapsed] = useState(false);
@@ -74,26 +78,23 @@ function StatusSection({
     if (e.key === 'Escape') { setInputVal(''); setAdding(false); }
   }
 
-  async function handleDelete(taskId: string) {
-    if (confirm('Confirm delete?')) {
-      await apiFetch(`/tasks/${taskId}`, { method: 'DELETE' });
-      window.location.reload();
-    }
+  function handleDelete(taskId: string) {
+    toastConfirm({
+      title: 'Delete task?',
+      message: 'This task will be permanently removed.',
+      confirmLabel: 'Delete',
+      onConfirm: async () => {
+        await onDeleteTask(taskId);
+        toastSuccess('Task deleted');
+      },
+    });
   }
 
   async function handleDuplicate(task: Task) {
-    await apiFetch(`/tasks`, {
-      method: 'POST',
-      body: JSON.stringify({
-        title: `${task.title} (copy)`,
-        status: task.status,
-        projectId: task.projectId,
-        priority: task.priority,
-        assignee: task.assignee,
-      })
-    });
-    window.location.reload();
+    await onDuplicateTask(task);
   }
+
+  const currentUserName = getStoredUserName();
 
   return (
     <div style={{ width: '100%' }}>
@@ -137,8 +138,15 @@ function StatusSection({
                 </tr>
               </thead>
               <tbody>
-                {tasks.map((task) => (
-                  <tr key={task._id} className="list-view-table-row transition-colors cursor-pointer" onClick={() => router.push(`/dashboard/tasks/${task._id}`)}>
+                {tasks.map((task) => {
+                  const taskHref = `/dashboard/tasks/${task._id}`;
+                  return (
+                  <tr
+                    key={task._id}
+                    className="list-view-table-row transition-colors cursor-pointer"
+                    onMouseEnter={() => router.prefetch(taskHref)}
+                    onClick={() => router.push(taskHref)}
+                  >
                     <td className="text-[13px] font-medium p-3 h-11">{task.title}</td>
                     {fields.priority && <td className="p-3 h-11"><Priority value={task.priority} /></td>}
                     {fields.members && (
@@ -146,7 +154,7 @@ function StatusSection({
                         <AssignMemberPopover
                           taskId={task._id}
                           currentMembers={task.members || (task.assignee ? [task.assignee] : [])}
-                          onMembersChange={() => window.location.reload()}
+                          onMembersChange={onMembersChange}
                           trigger={
                             task.assignee ? (
                               <button className="outline-none flex items-center justify-center"><Avatar name={task.assignee} /></button>
@@ -172,7 +180,11 @@ function StatusSection({
                       </td>
                     )}
                     {fields.status && <td className="text-[13px] p-3 h-11">{task.status}</td>}
-                    {fields.reporter && <td className="text-[13px] list-view-table-cell-muted p-3 h-11">You</td>}
+                    {fields.reporter && (
+                      <td className="text-[13px] list-view-table-cell-muted p-3 h-11">
+                        {task.reporterName || currentUserName}
+                      </td>
+                    )}
                     <td />
                     <td className="p-3 h-11">
                       <DropdownMenu>
@@ -182,14 +194,15 @@ function StatusSection({
                           </button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
-                          <DropdownMenuItem onClick={(e) => { e.stopPropagation(); router.push(`/dashboard/tasks/${task._id}`); }}>Edit</DropdownMenuItem>
+                          <DropdownMenuItem onClick={(e) => { e.stopPropagation(); router.push(taskHref); }}>Edit</DropdownMenuItem>
                           <DropdownMenuItem onClick={(e) => { e.stopPropagation(); handleDuplicate(task); }}>Duplicate</DropdownMenuItem>
                           <DropdownMenuItem onClick={(e) => { e.stopPropagation(); handleDelete(task._id); }} className="text-red-600 dark:text-red-400 focus:text-red-600 dark:focus:text-red-400">Delete</DropdownMenuItem>
                         </DropdownMenuContent>
                       </DropdownMenu>
                     </td>
                   </tr>
-                ))}
+                  );
+                })}
               </tbody>
             </table>
           </div>
@@ -224,12 +237,18 @@ export default function ListView({
   query,
   fields,
   compact = false,
+  onDeleteTask,
+  onDuplicateTask,
+  onMembersChange,
 }: {
   tasksByColumn: Record<Status, Task[]>;
   onAddTask: (title: string, status: Status) => void;
   query: string;
   fields: Record<string, boolean>;
   compact?: boolean;
+  onDeleteTask: (taskId: string) => Promise<void>;
+  onDuplicateTask: (task: Task) => Promise<void>;
+  onMembersChange: () => void;
 }) {
   const STATUSES: Status[] = ['To Do', 'Doing', 'Completed', 'On Hold'];
   const searching = query.length > 0;
@@ -237,7 +256,17 @@ export default function ListView({
     <div className={`flex-1 overflow-y-auto scrollbar-none ${compact ? 'p-0' : 'p-3 sm:p-6'}`} style={{ overflowX: 'hidden' }}>
       <div className="flex flex-col" style={{ gap: '16px' }}> 
       {STATUSES.filter((s) => !searching || tasksByColumn[s].length > 0).map((s) => (
-        <StatusSection key={s} status={s} tasks={tasksByColumn[s]} onAddTask={onAddTask} searching={searching} fields={fields} />
+        <StatusSection
+          key={s}
+          status={s}
+          tasks={tasksByColumn[s]}
+          onAddTask={onAddTask}
+          searching={searching}
+          fields={fields}
+          onDeleteTask={onDeleteTask}
+          onDuplicateTask={onDuplicateTask}
+          onMembersChange={onMembersChange}
+        />
       ))}
       </div>
     </div>

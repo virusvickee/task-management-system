@@ -5,6 +5,7 @@ import { Task, TaskSchema } from './schemas/task.schema';
 import { TasksService } from './tasks.service';
 import { TasksController } from './tasks.controller';
 import { UsersModule } from '../users/users.module';
+import { ProjectsModule } from '../projects/projects.module';
 
 @Module({
   imports: [
@@ -13,6 +14,7 @@ import { UsersModule } from '../users/users.module';
       secret: process.env.JWT_SECRET || 'dev-secret',
     }),
     UsersModule,
+    ProjectsModule,
   ],
   providers: [TasksService],
   controllers: [TasksController],

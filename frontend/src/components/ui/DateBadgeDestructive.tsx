@@ -46,7 +46,7 @@ export default function DateBadgeDestructive({
       style={containerStyle}
     >
       {showLeftIcon && <Icon size={11} className="text-red-600 dark:text-red-400 shrink-0" />}
-      <span className="text-[11px] font-medium text-red-700 dark:text-red-300 whitespace-nowrap leading-none mt-[1px]">{badgeText}</span>
+      <span className="text-[11px] font-semibold text-red-700 dark:text-red-300 whitespace-nowrap leading-none mt-[1px]">{badgeText}</span>
       {showRightIcon && <Icon size={11} className="text-red-600 dark:text-red-400 shrink-0" />}
     </div>
   );

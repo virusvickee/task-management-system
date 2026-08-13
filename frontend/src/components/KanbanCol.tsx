@@ -11,9 +11,11 @@ interface Props {
   onDrop: (taskId: string, status: Status) => void;
   onAddTask: (title: string, status: Status) => void;
   fields: Record<string, boolean>;
+  onDeleteTask?: (taskId: string) => Promise<void>;
+  onDuplicateTask?: (task: Task) => Promise<void>;
 }
 
-export default function KanbanCol({ title, tasks, onDrop, onAddTask, fields }: Props) {
+export default function KanbanCol({ title, tasks, onDrop, onAddTask, fields, onDeleteTask, onDuplicateTask }: Props) {
   const [dragOver, setDragOver] = useState(false);
   const [adding, setAdding] = useState(false);
   const [inputVal, setInputVal] = useState('');
@@ -78,7 +80,13 @@ export default function KanbanCol({ title, tasks, onDrop, onAddTask, fields }: P
 
         <div className="flex flex-col items-center gap-4 p-3">
           {tasks.map((task) => (
-            <TaskCard key={task._id} task={task} fields={fields} />
+            <TaskCard
+              key={task._id}
+              task={task}
+              fields={fields}
+              onDeleteTask={onDeleteTask}
+              onDuplicateTask={onDuplicateTask}
+            />
           ))}
 
           {adding ? (

@@ -115,9 +115,9 @@ function readStoredAccent(): AccentColor {
   return stored;
 }
 
-function isLoginPath(): boolean {
-  if (typeof window === 'undefined') return false;
-  const path = window.location.pathname;
+export function isLoginPath(pathname?: string): boolean {
+  if (typeof window === 'undefined' && !pathname) return false;
+  const path = pathname ?? window.location.pathname;
   return path === '/' || path === '/login';
 }
 

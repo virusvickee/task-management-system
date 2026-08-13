@@ -1,7 +1,8 @@
 'use client';
 
 import { useCallback, useEffect, useState } from 'react';
-import { apiFetch, guestLogin } from '@/lib/api';
+import { apiFetch } from '@/lib/api';
+import { readProjectsList, writeProjectsList } from '@/lib/client-cache';
 
 export interface Project {
   _id: string;
@@ -11,27 +12,31 @@ export interface Project {
   dueDate?: string;
 }
 
-async function ensureAuth() {
-  if (!localStorage.getItem('tms-token')) await guestLogin();
-}
-
 export function useProjects() {
-  const [projects, setProjects] = useState<Project[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [projects, setProjects] = useState<Project[]>(() => readProjectsList() ?? []);
+  const [loading, setLoading] = useState(() => !readProjectsList());
+
+  const loadProjects = useCallback((background = Boolean(readProjectsList())) => {
+    if (!background) setLoading(true);
+    return apiFetch('/projects')
+      .then((data: Project[]) => {
+        writeProjectsList(data);
+        setProjects(data);
+      })
+      .catch(console.error)
+      .finally(() => setLoading(false));
+  }, []);
 
   useEffect(() => {
-    setLoading(true);
-    ensureAuth()
-      .then(() => apiFetch('/projects'))
-      .then((data) => {
-        setProjects(data);
-        setLoading(false);
-      })
-      .catch((err) => {
-        console.error(err);
-        setLoading(false);
-      });
-  }, []);
+    const initial = readProjectsList();
+    if (initial) {
+      setProjects(initial);
+      setLoading(false);
+      loadProjects(true);
+      return;
+    }
+    loadProjects(false);
+  }, [loadProjects]);
 
   const createProject = useCallback(async (name: string) => {
     const optimistic: Project = {
@@ -40,41 +45,65 @@ export function useProjects() {
       priority: 'No Priority',
       lead: 'You',
     };
-    setProjects((prev) => [optimistic, ...prev]);
+    setProjects((prev) => {
+      const next = [optimistic, ...prev];
+      writeProjectsList(next);
+      return next;
+    });
     try {
       const created = await apiFetch('/projects', {
         method: 'POST',
         body: JSON.stringify({ name }),
       });
-      setProjects((prev) => prev.map((p) => (p._id === optimistic._id ? created : p)));
+      setProjects((prev) => {
+        const next = prev.map((p) => (p._id === optimistic._id ? created : p));
+        writeProjectsList(next);
+        return next;
+      });
     } catch {
-      setProjects((prev) => prev.filter((p) => p._id !== optimistic._id));
+      setProjects((prev) => {
+        const next = prev.filter((p) => p._id !== optimistic._id);
+        writeProjectsList(next);
+        return next;
+      });
     }
   }, []);
 
   const updateProject = useCallback(async (id: string, partialFields: Partial<Project>) => {
     if (id.startsWith('tmp-')) return;
-    setProjects((prev) => prev.map((p) => (p._id === id ? { ...p, ...partialFields } : p)));
+    setProjects((prev) => {
+      const next = prev.map((p) => (p._id === id ? { ...p, ...partialFields } : p));
+      writeProjectsList(next);
+      return next;
+    });
     try {
       const updated = await apiFetch(`/projects/${id}`, {
         method: 'PATCH',
         body: JSON.stringify(partialFields),
       });
-      setProjects((prev) => prev.map((p) => (p._id === id ? updated : p)));
+      setProjects((prev) => {
+        const next = prev.map((p) => (p._id === id ? updated : p));
+        writeProjectsList(next);
+        return next;
+      });
     } catch {
-      apiFetch('/projects').then(setProjects).catch(console.error);
+      loadProjects(true);
     }
-  }, []);
+  }, [loadProjects]);
 
   const deleteProject = useCallback(async (id: string) => {
     if (id.startsWith('tmp-')) return;
-    setProjects((prev) => prev.filter((p) => p._id !== id));
+    setProjects((prev) => {
+      const next = prev.filter((p) => p._id !== id);
+      writeProjectsList(next);
+      return next;
+    });
     try {
       await apiFetch(`/projects/${id}`, { method: 'DELETE' });
     } catch {
-      apiFetch('/projects').then(setProjects).catch(console.error);
+      loadProjects(true);
     }
-  }, []);
+  }, [loadProjects]);
 
   return { projects, loading, createProject, updateProject, deleteProject };
 }

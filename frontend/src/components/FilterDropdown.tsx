@@ -1,13 +1,18 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import {
-  Check, ChevronRight, Filter,
+  Check, ChevronDown, ChevronRight, Filter,
   Circle, BarChart2, Users, Calendar, Tag, User,
 } from 'lucide-react';
 import { RiTeamLine } from 'react-icons/ri';
 import PriorityBars, { priorityTextColor } from '@/components/ui/PriorityBars';
 import type { Priority } from '@/lib/priority';
+import { LABEL_OPTIONS, MEMBER_OPTIONS, TEAM_OPTIONS } from '@/lib/members';
+import { useFixedDropdownStyle } from '@/hooks/useFixedDropdown';
+import { useIsMobile } from '@/hooks/useIsMobile';
+import MobileDropdownBackdrop from '@/components/MobileDropdownBackdrop';
 
 export interface TaskFilters {
   priorities: string[];
@@ -34,10 +39,10 @@ const PRIORITY_OPTIONS: Priority[] = [
 ];
 
 const STATUS_OPTIONS = [
-  { label: 'To Do', dot: 'bg-amber-400' },
+  { label: 'To Do', dot: 'bg-orange-400' },
   { label: 'Doing', dot: 'bg-blue-500' },
   { label: 'Completed', dot: 'bg-green-500' },
-  { label: 'On Hold', dot: 'bg-orange-400' },
+  { label: 'On Hold', dot: 'bg-amber-400' },
 ];
 
 const DUE_DATE_OPTIONS = [
@@ -47,10 +52,7 @@ const DUE_DATE_OPTIONS = [
   { label: 'No date', value: 'no_date' },
 ];
 
-const LABEL_OPTIONS = ['Research', 'Design', 'Development', 'Testing', 'Deployment'];
-const MEMBER_OPTIONS = ['Ankit Dutta', 'Priya Sharma', 'Raj Mehta', 'Sara Lee'];
-const TEAM_OPTIONS = ['Design', 'Engineering', 'Product', 'QA'];
-const REPORTER_OPTIONS = ['You', 'Ankit Dutta', 'Priya Sharma'];
+const REPORTER_OPTIONS = ['You', ...MEMBER_OPTIONS];
 
 type FilterKey = 'status' | 'priority' | 'members' | 'dueDate' | 'teams' | 'labels' | 'reporter';
 
@@ -82,12 +84,18 @@ function badgeCount(field: FilterKey, filters: TaskFilters): number {
 function FilterSubmenu({
   title,
   children,
+  mobile,
 }: {
   title: string;
   children: React.ReactNode;
+  mobile?: boolean;
 }) {
   return (
-    <div className="filter-dropdown-submenu fields-dropdown-panel absolute top-0 right-full mr-1 min-w-[168px] rounded-xl shadow-lg py-1.5 z-[10000] select-none">
+    <div
+      className={`filter-dropdown-submenu fields-dropdown-panel shadow-lg py-1.5 z-[10000] select-none${
+        mobile ? ' filter-dropdown-submenu--inline' : ' filter-dropdown-submenu--flyout absolute top-0 right-full mr-1 min-w-[168px] rounded-xl'
+      }`}
+    >
       <p className="filter-dropdown-submenu-header">{title}</p>
       {children}
     </div>
@@ -107,7 +115,7 @@ function SubmenuOption({
     <button
       type="button"
       onClick={onClick}
-      className="fields-dropdown-item w-full flex items-center gap-2.5 px-3 py-2 text-[13px] transition-colors rounded-lg mx-0"
+      className="fields-dropdown-item app-dropdown-item w-full flex items-center gap-2.5 px-3 py-2 text-[13px] transition-colors rounded-lg mx-0"
     >
       {children}
       {selected && <Check size={12} className="shrink-0 ml-auto text-[var(--base-primary)]" />}
@@ -124,19 +132,49 @@ interface Props {
 export default function FilterDropdown({ filters, onFiltersChange, ariaLabel = 'Filter' }: Props) {
   const [open, setOpen] = useState(false);
   const [activeField, setActiveField] = useState<FilterKey | null>(null);
+  const isMobile = useIsMobile();
   const ref = useRef<HTMLDivElement>(null);
+  const panelRef = useRef<HTMLDivElement>(null);
+  const panelStyle = useFixedDropdownStyle(open, ref, isMobile ? 320 : 200);
+
+  const closeDropdown = () => {
+    setOpen(false);
+    setActiveField(null);
+  };
 
   useEffect(() => {
     if (!open) return;
-    function handler(e: MouseEvent) {
-      if (ref.current && !ref.current.contains(e.target as Node)) {
-        setOpen(false);
-        setActiveField(null);
-      }
+    function handler(e: PointerEvent) {
+      const target = e.target as Node;
+      if (ref.current?.contains(target)) return;
+      if (panelRef.current?.contains(target)) return;
+      closeDropdown();
     }
-    document.addEventListener('mousedown', handler);
-    return () => document.removeEventListener('mousedown', handler);
+    document.addEventListener('pointerdown', handler);
+    return () => document.removeEventListener('pointerdown', handler);
   }, [open]);
+
+  useEffect(() => {
+    if (!open || !isMobile) return;
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.body.style.overflow = previousOverflow;
+    };
+  }, [open, isMobile]);
+
+  useEffect(() => {
+    if (!open || !isMobile) return;
+    const handler = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') closeDropdown();
+    };
+    document.addEventListener('keydown', handler);
+    return () => document.removeEventListener('keydown', handler);
+  }, [open, isMobile]);
+
+  function selectField(key: FilterKey) {
+    setActiveField((current) => (current === key ? null : key));
+  }
 
   function toggleInArray(field: keyof TaskFilters, value: string) {
     const current = filters[field];
@@ -187,17 +225,24 @@ export default function FilterDropdown({ filters, onFiltersChange, ariaLabel = '
         )}
       </button>
 
-      {open && (
-        <div className="filter-dropdown-panel fields-dropdown-panel absolute right-0 top-full mt-1.5 w-[200px] rounded-xl shadow-lg z-[9999] py-1.5 select-none">
+      {open && typeof document !== 'undefined' && createPortal(
+        <>
+          {isMobile && <MobileDropdownBackdrop onClose={closeDropdown} />}
+          <div
+            ref={panelRef}
+            className="filter-dropdown-panel fields-dropdown-panel toolbar-dropdown-panel app-toolbar-dropdown rounded-xl shadow-lg py-1.5 select-none"
+            style={panelStyle}
+          >
           {FILTER_FIELDS.map(({ key, label, Icon }) => {
             const count = badgeCount(key, filters);
             const isActive = activeField === key;
             return (
-              <div key={key} className="relative">
+              <div key={key} className={isMobile ? '' : 'relative'}>
                 <button
                   type="button"
-                  onMouseEnter={() => setActiveField(key)}
-                  className={`fields-dropdown-item w-full flex items-center gap-2.5 px-3 py-[9px] transition-colors${isActive ? ' fields-dropdown-item--active' : ''}`}
+                  onMouseEnter={isMobile ? undefined : () => setActiveField(key)}
+                  onClick={() => selectField(key)}
+                  className={`fields-dropdown-item app-dropdown-item w-full flex items-center gap-2.5 px-3 py-[9px] transition-colors${isActive ? ' fields-dropdown-item--active' : ''}`}
                 >
                   <Icon
                     size={key === 'teams' ? 16 : 14}
@@ -212,11 +257,18 @@ export default function FilterDropdown({ filters, onFiltersChange, ariaLabel = '
                       {count}
                     </span>
                   )}
-                  <ChevronRight size={13} className="fields-dropdown-item-icon shrink-0" />
+                  {isMobile ? (
+                    <ChevronDown
+                      size={14}
+                      className={`fields-dropdown-item-icon shrink-0 transition-transform${isActive ? ' rotate-180' : ''}`}
+                    />
+                  ) : (
+                    <ChevronRight size={13} className="fields-dropdown-item-icon shrink-0" />
+                  )}
                 </button>
 
                 {isActive && key === 'priority' && (
-                  <FilterSubmenu title="Priority">
+                  <FilterSubmenu title="Priority" mobile={isMobile}>
                     {PRIORITY_OPTIONS.map((p) => (
                       <SubmenuOption
                         key={p}
@@ -231,7 +283,7 @@ export default function FilterDropdown({ filters, onFiltersChange, ariaLabel = '
                 )}
 
                 {isActive && key === 'status' && (
-                  <FilterSubmenu title="Status">
+                  <FilterSubmenu title="Status" mobile={isMobile}>
                     {STATUS_OPTIONS.map((s) => (
                       <SubmenuOption
                         key={s.label}
@@ -246,7 +298,7 @@ export default function FilterDropdown({ filters, onFiltersChange, ariaLabel = '
                 )}
 
                 {isActive && key === 'members' && (
-                  <FilterSubmenu title="Members">
+                  <FilterSubmenu title="Members" mobile={isMobile}>
                     {MEMBER_OPTIONS.map((m) => (
                       <SubmenuOption
                         key={m}
@@ -263,7 +315,7 @@ export default function FilterDropdown({ filters, onFiltersChange, ariaLabel = '
                 )}
 
                 {isActive && key === 'dueDate' && (
-                  <FilterSubmenu title="Due Date">
+                  <FilterSubmenu title="Due Date" mobile={isMobile}>
                     {DUE_DATE_OPTIONS.map((d) => (
                       <SubmenuOption
                         key={d.value}
@@ -278,7 +330,7 @@ export default function FilterDropdown({ filters, onFiltersChange, ariaLabel = '
                 )}
 
                 {isActive && key === 'teams' && (
-                  <FilterSubmenu title="Teams">
+                  <FilterSubmenu title="Teams" mobile={isMobile}>
                     {TEAM_OPTIONS.map((t) => (
                       <SubmenuOption
                         key={t}
@@ -293,7 +345,7 @@ export default function FilterDropdown({ filters, onFiltersChange, ariaLabel = '
                 )}
 
                 {isActive && key === 'labels' && (
-                  <FilterSubmenu title="Labels">
+                  <FilterSubmenu title="Labels" mobile={isMobile}>
                     {LABEL_OPTIONS.map((l) => (
                       <SubmenuOption
                         key={l}
@@ -308,7 +360,7 @@ export default function FilterDropdown({ filters, onFiltersChange, ariaLabel = '
                 )}
 
                 {isActive && key === 'reporter' && (
-                  <FilterSubmenu title="Reporter">
+                  <FilterSubmenu title="Reporter" mobile={isMobile}>
                     {REPORTER_OPTIONS.map((r) => (
                       <SubmenuOption
                         key={r}
@@ -338,6 +390,8 @@ export default function FilterDropdown({ filters, onFiltersChange, ariaLabel = '
             </>
           )}
         </div>
+        </>,
+        document.body,
       )}
     </div>
   );

@@ -174,9 +174,11 @@ Specific deviations:
 
 ## Part 2 Submission
 
-The AbleSpace product review (Part 2) document/video will be linked here once completed.
+**Product review:** [AbleSpace Take Data – Caseload Workflow](./docs/part2-ablespace-take-data.md)
 
-> _Link / location: TBD_
+Add screenshots to `docs/screenshots/` and update the document with your own observations before submitting.
+
+> **Video alternative:** If you submit a walkthrough video instead, link it here (YouTube/Loom).
 
 ---
 

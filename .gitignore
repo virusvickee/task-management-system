@@ -1,8 +1,13 @@
 node_modules/
 .env
 .env.local
+.env.production
 dist/
 .next/
 *.log
 scripts/
+
+# Part 2 – AbleSpace product review (local submission only)
+docs/part2-ablespace-take-data.md
+docs/screenshots/
 

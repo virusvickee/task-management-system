@@ -16,6 +16,7 @@ import { CreateTaskDto } from './dto/create-task.dto';
 import { UpdateTaskDto } from './dto/update-task.dto';
 import { CreateCommentDto } from './dto/create-comment.dto';
 import { UpdateCommentDto } from './dto/update-comment.dto';
+import { ParseMongoIdPipe } from '../common/pipes/parse-mongo-id.pipe';
 
 @Controller('tasks')
 @UseGuards(JwtStrategyGuard)
@@ -33,24 +34,24 @@ export class TasksController {
   }
 
   @Get(':id')
-  findOne(@Req() req: any, @Param('id') id: string) {
+  findOne(@Req() req: any, @Param('id', ParseMongoIdPipe) id: string) {
     return this.tasksService.findOne(req.user.sub, id);
   }
 
   @Patch(':id')
-  update(@Req() req: any, @Param('id') id: string, @Body() dto: UpdateTaskDto) {
+  update(@Req() req: any, @Param('id', ParseMongoIdPipe) id: string, @Body() dto: UpdateTaskDto) {
     return this.tasksService.update(req.user.sub, id, dto);
   }
 
   @Delete(':id')
-  remove(@Req() req: any, @Param('id') id: string) {
+  remove(@Req() req: any, @Param('id', ParseMongoIdPipe) id: string) {
     return this.tasksService.remove(req.user.sub, id);
   }
 
   @Post(':id/comments')
   addComment(
     @Req() req: any,
-    @Param('id') id: string,
+    @Param('id', ParseMongoIdPipe) id: string,
     @Body() dto: CreateCommentDto,
   ) {
     return this.tasksService.addComment(req.user.sub, id, dto.text, dto.attachments);
@@ -59,8 +60,8 @@ export class TasksController {
   @Post(':id/comments/:commentId/reactions')
   addReaction(
     @Req() req: any,
-    @Param('id') id: string,
-    @Param('commentId') commentId: string,
+    @Param('id', ParseMongoIdPipe) id: string,
+    @Param('commentId', ParseMongoIdPipe) commentId: string,
     @Body('emoji') emoji: string,
   ) {
     return this.tasksService.addReaction(req.user.sub, id, commentId, emoji);
@@ -69,8 +70,8 @@ export class TasksController {
   @Patch(':id/comments/:commentId')
   updateComment(
     @Req() req: any,
-    @Param('id') id: string,
-    @Param('commentId') commentId: string,
+    @Param('id', ParseMongoIdPipe) id: string,
+    @Param('commentId', ParseMongoIdPipe) commentId: string,
     @Body() dto: UpdateCommentDto,
   ) {
     return this.tasksService.updateComment(req.user.sub, id, commentId, dto.text);
@@ -79,8 +80,8 @@ export class TasksController {
   @Delete(':id/comments/:commentId')
   removeComment(
     @Req() req: any,
-    @Param('id') id: string,
-    @Param('commentId') commentId: string,
+    @Param('id', ParseMongoIdPipe) id: string,
+    @Param('commentId', ParseMongoIdPipe) commentId: string,
   ) {
     return this.tasksService.removeComment(req.user.sub, id, commentId);
   }

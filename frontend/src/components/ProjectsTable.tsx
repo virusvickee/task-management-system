@@ -15,6 +15,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import type { Project } from '@/hooks/useProjects';
 import { PRIORITIES, type Priority } from '@/lib/priority';
+import { toastConfirm, toastSuccess } from '@/lib/toast';
 
 function leadInitials(name: string) {
   return name.split(' ').map((p) => p[0]).join('').slice(0, 2).toUpperCase();
@@ -40,7 +41,6 @@ function LeadMenuAvatar({ name }: { name: string }) {
 
 function priorityLabel(value: Priority) {
   if (value === 'No Priority') return '—';
-  if (value === 'Urgent') return 'High';
   return value;
 }
 
@@ -233,9 +233,15 @@ export default function ProjectsTable({
 
   function handleDelete(id: string, name: string) {
     if (id.startsWith('tmp-')) return;
-    if (window.confirm(`Delete project "${name}"?`)) {
-      onDelete(id);
-    }
+    toastConfirm({
+      title: 'Delete project?',
+      message: `"${name}" will be permanently removed.`,
+      confirmLabel: 'Delete',
+      onConfirm: async () => {
+        await onDelete(id);
+        toastSuccess('Project deleted');
+      },
+    });
   }
 
   const colCount = 2
@@ -279,11 +285,13 @@ export default function ProjectsTable({
             )}
             {!loading && projects.map((project) => {
               const isRenaming = renamingId === project._id;
+              const projectHref = `/dashboard/projects/${project._id}`;
               return (
                 <tr
                   key={project._id}
                   className="cursor-pointer"
-                  onClick={() => !isRenaming && router.push(`/dashboard/projects/${project._id}`)}
+                  onMouseEnter={() => router.prefetch(projectHref)}
+                  onClick={() => !isRenaming && router.push(projectHref)}
                 >
                   <td className="dashboard-projects-table-col-projects" onClick={(e) => isRenaming && e.stopPropagation()}>
                     {isRenaming ? (

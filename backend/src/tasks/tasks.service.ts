@@ -5,15 +5,25 @@ import { Task, TaskDocument } from './schemas/task.schema';
 import { CreateTaskDto } from './dto/create-task.dto';
 import { UpdateTaskDto } from './dto/update-task.dto';
 import { UsersService } from '../users/users.service';
+import { ProjectsService } from '../projects/projects.service';
+import { validateCommentAttachments } from '../common/constants/attachments';
 
 @Injectable()
 export class TasksService {
   constructor(
     @InjectModel(Task.name) private taskModel: Model<TaskDocument>,
     private usersService: UsersService,
+    private projectsService: ProjectsService,
   ) {}
 
   async create(ownerId: string, dto: CreateTaskDto) {
+    if (dto.projectId) {
+      await this.projectsService.findOne(ownerId, dto.projectId);
+    }
+    if (dto.parentTaskId) {
+      await this.findOne(ownerId, dto.parentTaskId);
+    }
+
     const user = await this.usersService.findById(ownerId);
     return this.taskModel.create({
       ...dto,
@@ -59,6 +69,8 @@ export class TasksService {
     text: string,
     attachments: { name: string; dataUrl: string; type: string }[] = [],
   ) {
+    validateCommentAttachments(attachments);
+
     await this.findOne(ownerId, id);
     const task = await this.taskModel.findById(id).exec();
     if (!task) throw new NotFoundException('Task not found');

@@ -8,6 +8,33 @@ const config: Config = {
   		colors: {
   			background: 'var(--background)',
   			foreground: 'var(--foreground)',
+  			card: {
+  				DEFAULT: 'var(--card-bg)',
+  				foreground: 'var(--foreground)',
+  			},
+  			border: 'var(--base-border)',
+  			input: 'var(--base-input)',
+  			ring: 'var(--focus-ring)',
+  			destructive: {
+  				DEFAULT: '#dc2626',
+  				foreground: '#ffffff',
+  			},
+  			muted: {
+  				DEFAULT: 'var(--base-muted)',
+  				foreground: 'var(--base-muted-foreground)',
+  			},
+  			primary: {
+  				DEFAULT: 'var(--btn-primary-bg)',
+  				foreground: 'var(--btn-primary-fg)',
+  			},
+  			secondary: {
+  				DEFAULT: 'var(--base-muted)',
+  				foreground: 'var(--foreground)',
+  			},
+  			accent: {
+  				DEFAULT: 'var(--base-muted)',
+  				foreground: 'var(--foreground)',
+  			},
   			sidebar: {
   				DEFAULT: 'hsl(var(--sidebar-background))',
   				foreground: 'hsl(var(--sidebar-foreground))',

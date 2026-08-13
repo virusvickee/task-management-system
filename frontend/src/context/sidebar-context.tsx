@@ -1,6 +1,6 @@
 'use client';
 
-import { createContext, useContext, useEffect, useState, ReactNode } from 'react';
+import { createContext, useContext, useLayoutEffect, useState, ReactNode } from 'react';
 
 interface SidebarContextValue {
   sidebarOpen: boolean;
@@ -13,7 +13,7 @@ export function SidebarProvider({ children }: { children: ReactNode }) {
   // Default open on desktop (≥1024px), closed on mobile/tablet
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     const mq = window.matchMedia('(min-width: 1024px)');
     setSidebarOpen(mq.matches);
     const handler = (e: MediaQueryListEvent) => setSidebarOpen(e.matches);
