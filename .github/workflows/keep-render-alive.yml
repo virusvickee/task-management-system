@@ -1,0 +1,21 @@
+# Pings the Render backend every 5 minutes so the free tier does not spin down.
+# Requires the repo to be on GitHub (Actions must be enabled).
+
+name: Keep Render Alive
+
+on:
+  schedule:
+    # Every 5 minutes (UTC)
+    - cron: '*/5 * * * *'
+  workflow_dispatch:
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping backend health endpoint
+        run: |
+          URL="${RENDER_HEALTH_URL:-https://task-management-system-x4jo.onrender.com/api/health}"
+          echo "Pinging $URL"
+          curl -fsS --max-time 120 "$URL"
+          echo "OK"

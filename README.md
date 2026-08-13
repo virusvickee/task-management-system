@@ -8,23 +8,34 @@ A full-stack task management application built as part of a technical assessment
 
 | | URL |
 |---|---|
-| Frontend (Vercel) | https://your-app.vercel.app |
-| Backend API (Render) | https://your-api.onrender.com/api |
+| **Frontend (Vercel)** | https://task-management-system-dusky-eight.vercel.app |
+| **Backend API (Render)** | https://task-management-system-x4jo.onrender.com/api |
 
-> **Note on cold starts:** The backend is hosted on Render's free tier, which spins down after inactivity. The first request after an idle period can take **30–60 seconds** to respond. If the app appears unresponsive on first load, wait a moment and try again — subsequent requests will be fast.
+> **Note on cold starts:** The backend is hosted on Render's free tier, which spins down after ~15 minutes of inactivity. A GitHub Actions workflow (`.github/workflows/keep-render-alive.yml`) pings `/api/health` every 5 minutes to reduce cold starts. If the app is still slow on first load, wait a moment and retry — or trigger the workflow manually from the GitHub Actions tab.
+
+### Pre-submission checklist
+
+- [x] Frontend deployed on Vercel — set `NEXT_PUBLIC_API_URL=https://task-management-system-x4jo.onrender.com/api`
+- [x] Backend deployed on Render — set `CORS_ORIGIN=https://task-management-system-dusky-eight.vercel.app`
+- [x] Live URLs above updated in README
+- [ ] Latest frontend pushed & redeployed (name input + welcome toast — current live site may still show old login copy)
+- [ ] End-to-end tested on live URL (login → create task → task detail)
+- [ ] Part 2 doc filled with your screenshots and observations (or video link added below)
+- [ ] Repository public with meaningful commit history
+- [ ] Repo + deployment kept live for **45+ days** after submission
 
 ---
 
 ## Features Implemented
 
-- **Guest login** — enter any name to receive a JWT; all data is scoped to that guest session
+- **Guest login** — enter your name (optional) on the login screen to receive a JWT; all data is scoped to that guest session
 - **Kanban board (Board view)** — drag-and-drop cards across status columns (To Do / Doing / On Hold / Completed)
 - **List view** — tasks grouped by status in collapsible sections
 - **Task detail page** — full editing of priority, start/end/due dates, labels (tags), team, reporter, assigned members, subtasks, comments (with emoji reactions and file attachments), and resource links — all persisted to the backend
 - **Projects module** — create and manage projects; each project has its own scoped task board
 - **Dark mode + accent color theming** — persisted to `localStorage` across sessions
 - **Fully responsive** — mobile, tablet, and desktop layouts
-- **Settings / Profile page** — update display name, email, title, and username
+- **Settings / Profile page** — update display name, title, and username (email is read-only for guest sessions)
 
 ---
 
@@ -70,14 +81,14 @@ The app will be available at `http://localhost:3000`.
 | `MONGODB_URI` | MongoDB connection string (e.g. `mongodb+srv://...` for Atlas) |
 | `JWT_SECRET` | Secret key used to sign and verify JWT tokens |
 | `PORT` | Port the API listens on. **Do not set on Render** — Render injects this automatically. Default: `4000` for local dev. |
-| `CORS_ORIGIN` | Allowed CORS origin for the frontend (e.g. `https://your-app.vercel.app`). Must be set in production or all cross-origin requests will be blocked. |
+| `CORS_ORIGIN` | Allowed CORS origin for the frontend (e.g. `https://task-management-system-dusky-eight.vercel.app`). Must be set in production or all cross-origin requests will be blocked. |
 | `NODE_ENV` | Set to `production` on Render. Controls CORS behaviour — in production, only `CORS_ORIGIN` is allowed; localhost ports are not. |
 
 ### Frontend (`frontend/.env.local`)
 
 | Variable | Description |
 |---|---|
-| `NEXT_PUBLIC_API_URL` | Full base URL of the backend API (e.g. `https://your-api.onrender.com/api`). Required — the app will not make any API calls without it. |
+| `NEXT_PUBLIC_API_URL` | Full base URL of the backend API (e.g. `https://task-management-system-x4jo.onrender.com/api`). Required — the app will not make any API calls without it. |
 
 ---
 
@@ -95,7 +106,7 @@ Environment variables to set in the Render dashboard:
 | `NODE_ENV` | `production` |
 | `MONGODB_URI` | Your Atlas connection string |
 | `JWT_SECRET` | A long random secret |
-| `CORS_ORIGIN` | Your Vercel frontend URL (e.g. `https://your-app.vercel.app`) |
+| `CORS_ORIGIN` | `https://task-management-system-dusky-eight.vercel.app` |
 
 > `PORT` is injected automatically by Render — do not set it manually.
 
@@ -109,7 +120,7 @@ Environment variable to set in the Vercel dashboard:
 
 | Variable | Value |
 |---|---|
-| `NEXT_PUBLIC_API_URL` | Your Render backend URL (e.g. `https://your-api.onrender.com/api`) |
+| `NEXT_PUBLIC_API_URL` | `https://task-management-system-x4jo.onrender.com/api` |
 
 No other configuration is needed — Vercel auto-detects Next.js.
 
@@ -154,6 +165,31 @@ Auth is guest-only — there are no passwords or email verification. Submitting 
 
 Tasks reference their parent project via `projectId`. Subtasks reference their parent task via `parentTaskId`. Comments are embedded directly in the Task document as a subdocument array.
 
+### API Endpoints
+
+All protected routes require `Authorization: Bearer <token>`.
+
+| Method | Path | Description |
+|--------|------|-------------|
+| `GET` | `/api/health` | Health check (no auth — used by keep-alive ping) |
+| `POST` | `/api/auth/guest` | Guest login — body: `{ "name"?: string }` |
+| `GET` | `/api/users/me` | Current user profile |
+| `PATCH` | `/api/users/me` | Update profile (name, title, username) |
+| `GET` | `/api/tasks` | List tasks (`?projectId=` optional) |
+| `POST` | `/api/tasks` | Create task |
+| `GET` | `/api/tasks/:id` | Get task by id |
+| `PATCH` | `/api/tasks/:id` | Update task |
+| `DELETE` | `/api/tasks/:id` | Delete task |
+| `POST` | `/api/tasks/:id/comments` | Add comment |
+| `PATCH` | `/api/tasks/:id/comments/:commentId` | Edit comment |
+| `DELETE` | `/api/tasks/:id/comments/:commentId` | Delete comment |
+| `POST` | `/api/tasks/:id/comments/:commentId/reactions` | Add emoji reaction |
+| `GET` | `/api/projects` | List projects |
+| `POST` | `/api/projects` | Create project |
+| `GET` | `/api/projects/:id` | Get project |
+| `PATCH` | `/api/projects/:id` | Update project |
+| `DELETE` | `/api/projects/:id` | Delete project |
+
 ---
 
 ## Design Deviations from Figma
@@ -168,6 +204,7 @@ Specific deviations:
 - **Teams and Reporter fields** — the Figma shows these as selectable fields. Because auth is guest-only with no real user management, both fields are implemented as free-text inputs / fixed name lists rather than a live user directory.
 - **Drag-and-drop** — implemented using the browser's native HTML5 drag-and-drop API rather than a dedicated library (e.g. `react-beautiful-dnd`), since the Figma did not specify interaction behaviour and keeping dependencies minimal was preferred.
 - **Comment attachments** — stored as base64 data URLs embedded in the MongoDB document. This is not production-appropriate (large payloads, no CDN) but was chosen to avoid introducing a file storage dependency (S3, Cloudinary, etc.) within the assessment time constraints.
+- **Login screen** — guest flow uses a name field instead of email/password; Google sign-in is shown as a placeholder (not implemented). Subtext updated to match guest-first flow.
 - **Component library** — shadcn/ui components (Button, Popover, DropdownMenu, Calendar, etc.) were used as the base. Some components were customised beyond the default shadcn styles to approximate the Figma visuals.
 
 ---
