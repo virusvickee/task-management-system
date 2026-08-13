@@ -3576,48 +3576,6 @@ html[data-theme='dark'] .task-detail-properties-role__avatar {
   text-align: left;
 }
 
-.login-form {
-  display: flex;
-  flex-direction: column;
-  width: 100%;
-  gap: 12px;
-  text-align: left;
-}
-
-.login-label {
-  font-size: 13px;
-  font-weight: 500;
-  color: var(--foreground, #171717);
-}
-
-.login-input {
-  width: 100%;
-  height: 40px;
-  padding: 0 14px;
-  border: 1px solid var(--base-border, #e5e5e5);
-  border-radius: 10px;
-  font-size: 14px;
-  font-family: inherit;
-  color: var(--foreground, #171717);
-  background: var(--base-background, #ffffff);
-  outline: none;
-  transition: border-color 0.15s ease, box-shadow 0.15s ease;
-}
-
-.login-input::placeholder {
-  color: var(--base-muted-foreground, #a3a3a3);
-}
-
-.login-input:focus {
-  border-color: #171717;
-  box-shadow: 0 0 0 2px rgba(23, 23, 23, 0.08);
-}
-
-.login-input:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-}
-
 .login-actions {
   display: flex;
   flex-direction: column;

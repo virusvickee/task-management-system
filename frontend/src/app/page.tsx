@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, type FormEvent } from 'react';
+import { useState } from 'react';
 import { guestLogin } from '@/lib/api';
 import { resetThemeToDefaults } from '@/context/theme-context';
 import { useRouter } from 'next/navigation';
@@ -66,17 +66,14 @@ function GoogleIcon() {
 
 export default function LoginPage() {
   const router = useRouter();
-  const [name, setName] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
-  async function handleGuestLogin(e?: FormEvent) {
-    e?.preventDefault();
+  async function handleGuestLogin() {
     try {
       setLoading(true);
       setError('');
-      const trimmed = name.trim();
-      await guestLogin(trimmed || undefined);
+      await guestLogin();
       resetThemeToDefaults();
       sessionStorage.setItem('tms-welcome-toast', '1');
       router.push('/dashboard');
@@ -107,7 +104,7 @@ export default function LoginPage() {
               Let&apos;s get back on track
             </h1>
             <p className="login-subtext" id="login-subtext">
-              Enter your name below to continue as a guest, or sign in with Google.
+              Enter your email below to login to your account.
             </p>
           </div>
 
@@ -118,48 +115,33 @@ export default function LoginPage() {
             </div>
           )}
 
-          <form className="login-form" onSubmit={handleGuestLogin} noValidate>
-            <label htmlFor="guest-name" className="login-label">
-              Your name
-            </label>
-            <input
-              id="guest-name"
-              type="text"
-              className="login-input"
-              placeholder="Enter your name"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              maxLength={40}
+          {/* Buttons */}
+          <div className="login-actions">
+            <button
+              type="button"
+              id="btn-guest-login"
+              className="login-btn login-btn-primary"
+              onClick={handleGuestLogin}
               disabled={loading}
-              autoComplete="name"
-            />
+            >
+              {loading ? (
+                <span className="login-btn-spinner" aria-label="Loading" />
+              ) : (
+                'Continue as Guest'
+              )}
+            </button>
 
-            <div className="login-actions">
-              <button
-                type="submit"
-                id="btn-guest-login"
-                className="login-btn login-btn-primary"
-                disabled={loading}
-              >
-                {loading ? (
-                  <span className="login-btn-spinner" aria-label="Loading" />
-                ) : (
-                  'Continue as Guest'
-                )}
-              </button>
-
-              <button
-                type="button"
-                id="btn-google-login"
-                className="login-btn login-btn-outline"
-                onClick={handleGoogleLogin}
-                disabled={loading}
-              >
-                <GoogleIcon />
-                Login with Google
-              </button>
-            </div>
-          </form>
+            <button
+              type="button"
+              id="btn-google-login"
+              className="login-btn login-btn-outline"
+              onClick={handleGoogleLogin}
+              disabled={loading}
+            >
+              <GoogleIcon />
+              Login with Google
+            </button>
+          </div>
         </div>
 
         {/* Footer — sits outside the card */}

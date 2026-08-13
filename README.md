@@ -18,7 +18,6 @@ A full-stack task management application built as part of a technical assessment
 - [x] Frontend deployed on Vercel — set `NEXT_PUBLIC_API_URL=https://task-management-system-x4jo.onrender.com/api`
 - [x] Backend deployed on Render — set `CORS_ORIGIN=https://task-management-system-dusky-eight.vercel.app`
 - [x] Live URLs above updated in README
-- [ ] Latest frontend pushed & redeployed (name input + welcome toast — current live site may still show old login copy)
 - [ ] End-to-end tested on live URL (login → create task → task detail)
 - [ ] Part 2 doc filled with your screenshots and observations (or video link added below)
 - [ ] Repository public with meaningful commit history
@@ -28,7 +27,7 @@ A full-stack task management application built as part of a technical assessment
 
 ## Features Implemented
 
-- **Guest login** — enter your name (optional) on the login screen to receive a JWT; all data is scoped to that guest session
+- **Guest login** — one-click guest session via JWT; display name can be updated later in Settings
 - **Kanban board (Board view)** — drag-and-drop cards across status columns (To Do / Doing / On Hold / Completed)
 - **List view** — tasks grouped by status in collapsible sections
 - **Task detail page** — full editing of priority, start/end/due dates, labels (tags), team, reporter, assigned members, subtasks, comments (with emoji reactions and file attachments), and resource links — all persisted to the backend
@@ -155,7 +154,7 @@ task-management-system/
 
 ### Authentication
 
-Auth is guest-only — there are no passwords or email verification. Submitting a name on the login screen calls `POST /api/auth/guest`, which creates (or retrieves) a `User` document and returns a signed JWT. The token is stored in `localStorage` and attached as a `Bearer` token on every subsequent API request. All tasks and projects are filtered by the `owner` field (the authenticated user's MongoDB `_id`), so each guest session sees only its own data.
+Auth is guest-only — there are no passwords or email verification. Clicking **Continue as Guest** calls `POST /api/auth/guest`, which creates a guest `User` document (auto-generated name if none provided) and returns a signed JWT. The token is stored in `localStorage` and attached as a `Bearer` token on every subsequent API request. All tasks and projects are filtered by the `owner` field (the authenticated user's MongoDB `_id`), so each guest session sees only its own data. Users can update their display name in **Settings → Profile**.
 
 ### Database Schemas
 
@@ -204,7 +203,7 @@ Specific deviations:
 - **Teams and Reporter fields** — the Figma shows these as selectable fields. Because auth is guest-only with no real user management, both fields are implemented as free-text inputs / fixed name lists rather than a live user directory.
 - **Drag-and-drop** — implemented using the browser's native HTML5 drag-and-drop API rather than a dedicated library (e.g. `react-beautiful-dnd`), since the Figma did not specify interaction behaviour and keeping dependencies minimal was preferred.
 - **Comment attachments** — stored as base64 data URLs embedded in the MongoDB document. This is not production-appropriate (large payloads, no CDN) but was chosen to avoid introducing a file storage dependency (S3, Cloudinary, etc.) within the assessment time constraints.
-- **Login screen** — guest flow uses a name field instead of email/password; Google sign-in is shown as a placeholder (not implemented). Subtext updated to match guest-first flow.
+- **Google sign-in** — shown on the login screen per Figma; not implemented (shows a “Coming soon” toast). Guest login is the active auth path.
 - **Component library** — shadcn/ui components (Button, Popover, DropdownMenu, Calendar, etc.) were used as the base. Some components were customised beyond the default shadcn styles to approximate the Figma visuals.
 
 ---
