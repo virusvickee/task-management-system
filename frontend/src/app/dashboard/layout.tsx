@@ -5,8 +5,11 @@ import { useRouter } from 'next/navigation';
 import Sidebar from '@/components/Sidebar';
 import MobileBottomNav from '@/components/MobileBottomNav';
 import { useSidebar } from '@/context/sidebar-context';
-import { LOGIN_PATH } from '@/lib/api';
+import { LOGIN_PATH, getStoredUserName } from '@/lib/api';
 import { setAuthCookie } from '@/lib/auth-cookie';
+import { toastSuccess } from '@/lib/toast';
+
+const WELCOME_TOAST_KEY = 'tms-welcome-toast';
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
@@ -21,6 +24,17 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     }
     router.replace(LOGIN_PATH);
   }, [router]);
+
+  useEffect(() => {
+    if (!authReady) return;
+    if (sessionStorage.getItem(WELCOME_TOAST_KEY) !== '1') return;
+    sessionStorage.removeItem(WELCOME_TOAST_KEY);
+    const name = getStoredUserName();
+    toastSuccess(
+      name === 'You' ? 'Glad to have you here.' : `Welcome back, ${name}.`,
+      'Welcome',
+    );
+  }, [authReady]);
 
   if (!authReady) {
     return (

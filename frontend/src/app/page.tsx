@@ -75,6 +75,7 @@ export default function LoginPage() {
       setError('');
       await guestLogin();
       resetThemeToDefaults();
+      sessionStorage.setItem('tms-welcome-toast', '1');
       router.push('/dashboard');
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : 'Something went wrong');
